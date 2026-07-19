@@ -82,3 +82,14 @@ CREATE TABLE IF NOT EXISTS public.retail_media_logs (
     impressions INTEGER DEFAULT 0,
     clicks INTEGER DEFAULT 0
 );
+
+-- ================= POLÍTICAS RLS (RESOLVER ADVISOR) =================
+
+-- Opción Recomendada: Habilitar políticas de acceso público (Lectura/Escritura) para el API Anon Key
+CREATE POLICY "Permitir todo a perfiles" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a pets" ON public.pets FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a purchases" ON public.purchases FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a subscriptions" ON public.subscriptions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a appointments" ON public.appointments FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a scan_logs" ON public.scan_logs FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a retail_media_logs" ON public.retail_media_logs FOR ALL USING (true) WITH CHECK (true);
