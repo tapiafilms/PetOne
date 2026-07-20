@@ -67,9 +67,25 @@ export async function renderAnalytics(container) {
     const avgTicket = purchases.length > 0 ? Math.round(totalSales / purchases.length) : 0;
     
     // Scan & Go calculations
-    const totalScans = scanLogs.length;
-    const scansPurchased = scanLogs.filter(log => log.purchased).length;
-    const scansAbandoned = totalScans - scansPurchased;
+    let totalScans = scanLogs.length;
+    let scansPurchased = scanLogs.filter(log => log.purchased).length;
+    let scansAbandoned = totalScans - scansPurchased;
+    
+    let isMockData = false;
+    let displayFrictionLogs = scanLogs.filter(log => !log.purchased);
+    
+    if (totalScans === 0) {
+      isMockData = true;
+      totalScans = 10;
+      scansPurchased = 7;
+      scansAbandoned = 3;
+      displayFrictionLogs = [
+        { brand: 'Royal Canin', name: 'Medium Adult 15kg', abandonReason: 'Precio muy alto (Competencia)' },
+        { brand: 'KONG', name: 'Classic Juguete Rellenable', abandonReason: 'Sin stock en góndola' },
+        { brand: 'EasyClean', name: 'Arena Bentonita 4kg', abandonReason: 'Pocas reseñas de calidad' }
+      ];
+    }
+    
     const scanConversionRate = totalScans > 0 ? Math.round((scansPurchased / totalScans) * 100) : 0;
 
     parent.innerHTML = `
@@ -102,26 +118,33 @@ export async function renderAnalytics(container) {
           <div style="width: ${100 - scanConversionRate}%; background-color: var(--danger); height: 100%;" title="Abandonados: ${scansAbandoned}"></div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary);">
+        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 12px;">
           <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; background: var(--secondary); border-radius: 50%; display: inline-block;"></span> Comprados (${scansPurchased})</span>
           <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: inline-block;"></span> Abandonados (${scansAbandoned})</span>
         </div>
 
-        <!-- List of Abandons friction feedback -->
-        ${scansAbandoned > 0 ? `
-          <div style="border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 12px;">
-            <h4 style="font-size: 0.8rem; font-weight: bold; color: var(--text-primary); margin-bottom: 6px;">Fricciones de Compra Detectadas:</h4>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              ${scanLogs.filter(log => !log.purchased).map(log => `
-                <div style="font-size: 0.7rem; display: flex; justify-content: space-between; background-color: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 4px;">
-                  <span style="color: var(--text-primary); max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${log.brand} - ${log.name}</span>
-                  <span style="color: var(--danger); font-weight: 500;">➔ ${log.abandonReason}</span>
-                </div>
-              `).join('')}
+        <!-- List of Abandons friction feedback (Always visible) -->
+        <div style="border-top: 1px dashed var(--border-color); padding-top: 10px;">
+          <h4 style="font-size: 0.8rem; font-weight: bold; color: var(--text-primary); margin-bottom: 6px;">Fricciones de Compra Detectadas:</h4>
+          
+          ${isMockData ? `
+            <div style="font-size: 0.65rem; color: var(--accent); margin-bottom: 8px; font-style: italic; display: flex; align-items: center; gap: 4px;">
+              <span class="material-symbols-rounded" style="font-size: 12px;">info</span>
+              * Datos demostrativos de simulación (Aún no tienes registros de abandono reales)
             </div>
+          ` : ''}
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            ${displayFrictionLogs.map(log => `
+              <div style="font-size: 0.7rem; display: flex; justify-content: space-between; background-color: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 5px 8px; border-radius: 6px;">
+                <span style="color: var(--text-primary); font-weight: 500; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${log.brand} - ${log.name}</span>
+                <span style="color: var(--danger); font-weight: 600;">➔ ${log.abandonReason}</span>
+              </div>
+            `).join('')}
           </div>
-        ` : ''}
+        </div>
       </div>
+
 
       <!-- Retail Media Dashboard (Ads statistics) -->
       <div class="card">
