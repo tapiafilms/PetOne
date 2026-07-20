@@ -1,6 +1,6 @@
 // Dashboard Component for "Mis Mascotas" overview, smart recompra, ticket scanning, health diaries, subscriptions and Phase 3 upgrades (Retail Media + AI)
 // Added: Reels/Stories (Instagram style), Daily Trivia (+10 points), community AI portraits feed (interactive swiping card stack), and SOS lost pets bulletin.
-import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog, getCommunityPhotos } from '../utils/db.js';
+import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog, getCommunityPhotos, getAiPhotos } from '../utils/db.js';
 import { TIPS_AND_CARE, PRODUCTS } from '../data/mockData.js';
 import { navigateTo, showToast } from '../main.js';
 
@@ -10,6 +10,7 @@ export async function renderDashboard(container) {
   const purchases = await getPurchases();
   const subscriptions = await getSubscriptions();
   const communityPhotos = await getCommunityPhotos();
+  const localPhotos = await getAiPhotos();
 
   // Primary pet selected (defaults to first pet)
   let activePetIndex = 0;
@@ -32,15 +33,39 @@ export async function renderDashboard(container) {
     { id: 'story-4', title: 'Juntos IA', emoji: '✨', videoTitle: 'Retrato Mágico con tu Mascota', label: 'Probar IA', targetView: 'juntos', productType: '' }
   ];
 
+  // Combine and normalize local & community photos
+  const combined = [];
+  localPhotos.forEach(p => {
+    combined.push({
+      id: p.id,
+      petId: p.petId,
+      imageUrl: p.imageUrl,
+      owner: '@tú'
+    });
+  });
+
+  if (communityPhotos && communityPhotos.length > 0) {
+    communityPhotos.forEach(p => {
+      if (!combined.some(np => np.id === p.id)) {
+        combined.push({
+          id: p.id,
+          petId: p.pet_id, // Supabase field
+          imageUrl: p.image_url, // Supabase field
+          owner: '@creador_ia'
+        });
+      }
+    });
+  }
+
   // Community AI Portraits List (Uses real pictures from DB/Supabase or falls back to mock)
   let communityPortraits = [];
-  if (communityPhotos && communityPhotos.length > 0) {
-    communityPortraits = communityPhotos.map((ph, idx) => {
+  if (combined.length > 0) {
+    communityPortraits = combined.map((ph, idx) => {
       const pet = pets.find(p => p.id === ph.petId);
       return {
         id: ph.id,
         name: pet ? pet.name : 'Mascota',
-        owner: `@creador_ia`,
+        owner: ph.owner,
         votes: 18 + (idx * 4),
         imageUrl: ph.imageUrl,
         isReal: true
