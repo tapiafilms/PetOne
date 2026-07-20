@@ -162,6 +162,16 @@ export async function renderProfile(container) {
     container.appendChild(menuActions);
 
     menuActions.innerHTML = `
+      <!-- Shop Owner Admin & B2B Entry Point -->
+      <button id="btn-menu-owner" class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 12px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(17, 24, 39, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.3);">
+        <span class="material-symbols-rounded" style="color: var(--secondary);">analytics</span>
+        <div style="flex: 1; margin-left: 8px;">
+          <div style="font-size: 0.85rem; font-weight: bold; color: white;">Panel del Dueño (B2B & Analíticas)</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">Ventas, fricciones de góndola y conversión de anuncios</div>
+        </div>
+        <span class="material-symbols-rounded" style="color: var(--secondary); font-size: 18px;">chevron_right</span>
+      </button>
+
       <button id="btn-menu-subs" class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 12px;">
         <span class="material-symbols-rounded" style="color: var(--primary);">autorenew</span>
         <div style="flex: 1; margin-left: 8px;">
@@ -205,6 +215,7 @@ export async function renderProfile(container) {
       });
     });
 
+    document.getElementById('btn-menu-owner').addEventListener('click', () => navigateTo('analytics'));
     document.getElementById('btn-menu-subs').addEventListener('click', () => navigateTo('subscriptions'));
     document.getElementById('btn-menu-health').addEventListener('click', () => navigateTo('health', pets[0]?.id));
     document.getElementById('btn-menu-privacy').addEventListener('click', () => navigateTo('analytics')); // open privacy tab
