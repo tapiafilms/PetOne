@@ -112,7 +112,7 @@ export async function saveProfile(profileData) {
     const store = transaction.objectStore('profile');
     const request = store.put(record);
     request.onsuccess = () => {
-      syncToCloud('profiles', record);
+      syncToCloud('petone_profiles', record);
       resolve();
     };
     request.onerror = () => reject(request.error);

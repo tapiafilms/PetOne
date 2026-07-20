@@ -2,7 +2,7 @@
 -- Copia y pega este script en el editor SQL Editor de tu consola de Supabase.
 
 -- 1. Tabla de Perfil del Tutor (Hogar)
-CREATE TABLE IF NOT EXISTS public.profiles (
+CREATE TABLE IF NOT EXISTS public.petone_profiles (
     id TEXT PRIMARY KEY, -- Usamos 'user' para el MVP local o el ID de auth de Supabase
     name TEXT NOT NULL,
     email TEXT,
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS public.ai_photos (
 -- ================= POLÍTICAS RLS (RESOLVER ADVISOR) =================
 
 -- Opción Recomendada: Habilitar políticas de acceso público (Lectura/Escritura) para el API Anon Key
-CREATE POLICY "Permitir todo a perfiles" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a perfiles" ON public.petone_profiles FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Permitir todo a pets" ON public.pets FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Permitir todo a purchases" ON public.purchases FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Permitir todo a subscriptions" ON public.subscriptions FOR ALL USING (true) WITH CHECK (true);
