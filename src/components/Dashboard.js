@@ -1,5 +1,5 @@
 // Dashboard Component for "Mis Mascotas" overview, smart recompra, ticket scanning, health diaries, subscriptions and Phase 3 upgrades (Retail Media + AI)
-// Added: Reels/Stories (Instagram style), Daily Trivia (+10 points), community AI portraits feed (Últimos Retratos IA), and SOS lost pets bulletin.
+// Added: Reels/Stories (Instagram style), Daily Trivia (+10 points), community AI portraits feed (interactive swiping card stack), and SOS lost pets bulletin.
 import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog, getCommunityPhotos } from '../utils/db.js';
 import { TIPS_AND_CARE, PRODUCTS } from '../data/mockData.js';
 import { navigateTo, showToast } from '../main.js';
@@ -66,6 +66,15 @@ export async function renderDashboard(container) {
       correct: false
     };
   }
+
+  // Card Stack swipe state variables
+  let _stackOrder = [];
+  let _stackEls = [];
+  let _dragActive = false;
+  let _dragStartY = 0;
+  let _dragCurrY = 0;
+  let _dragVel = 0;
+  let _dragPrevY = 0;
 
   // Register Retail Media Impression
   try {
@@ -443,73 +452,23 @@ export async function renderDashboard(container) {
     `;
     container.appendChild(scanGoCard);
 
-    // 4. Últimos Retratos IA (Public Community Feed)
+    // 4. Últimos Retratos IA (Interactive dragging card stack)
     const contestSection = document.createElement('div');
     contestSection.style.marginBottom = '1.5rem';
     contestSection.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <h2><span class="material-symbols-rounded" style="color: var(--accent);">auto_awesome</span> Últimos Retratos IA</h2>
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        ${communityPortraits.slice(0, 4).map(c => `
-          <div class="glass-card" style="padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative;">
-            
-            <!-- Real photo vs Emoji card representation -->
-            ${c.isReal ? `
-              <div style="width: 100%; height: 100px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; cursor: pointer;" class="btn-community-portrait-view" data-url="${c.imageUrl}">
-                <img src="${c.imageUrl}" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
-              </div>
-            ` : `
-              <div style="width: 100%; height: 100px; border-radius: 8px; background: ${c.color}; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin-bottom: 8px;">
-                ${c.emoji}
-              </div>
-            `}
-
-            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; font-size: 0.75rem;">
-              <div>
-                <strong>${c.name}</strong>
-                <div style="color: var(--text-muted); font-size: 0.65rem;">${c.owner}</div>
-              </div>
-              <button class="btn-vote-heart" data-id="${c.id}" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 2px; color: var(--text-secondary);">
-                <span class="material-symbols-rounded" style="font-size: 16px;">favorite</span>
-                <span class="vote-count">${c.votes}</span>
-              </button>
-            </div>
-          </div>
-        `).join('')}
-      </div>
+      
+      <!-- Interactive drag card stack container -->
+      <div id="card-stack" style="position: relative; height: 240px; margin: 10px 4px 20px 4px;"></div>
     `;
     container.appendChild(contestSection);
 
-    // Vote handler
-    contestSection.querySelectorAll('.btn-vote-heart').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const cId = btn.dataset.id;
-        const icon = btn.querySelector('.material-symbols-rounded');
-        const countSpan = btn.querySelector('.vote-count');
-        const isVoted = icon.classList.contains('voted-heart');
-        
-        const c = communityPortraits.find(x => x.id === cId);
-        if (!c) return;
-
-        if (isVoted) {
-          icon.classList.remove('voted-heart');
-          c.votes--;
-        } else {
-          icon.classList.add('voted-heart');
-          c.votes++;
-          showToast(`¡Voto registrado para el retrato de ${c.name}!`);
-        }
-        countSpan.textContent = c.votes;
-      });
-    });
-
-    // Modal view handler for real portraits
-    contestSection.querySelectorAll('.btn-community-portrait-view').forEach(img => {
-      img.addEventListener('click', () => {
-        openPreviewModal(img.dataset.url);
-      });
-    });
+    // Initialize drag stack physics and listeners
+    setTimeout(() => {
+      initCardStack(document.getElementById('card-stack'), communityPortraits);
+    }, 50);
 
     // SOS Mascotas Perdidas Bulletin
     const sosSection = document.createElement('div');
@@ -611,6 +570,207 @@ export async function renderDashboard(container) {
     floatAiBtn.addEventListener('click', () => navigateTo('ai'));
     document.getElementById('btn-goto-health').addEventListener('click', () => navigateTo('health', activePet.id));
     document.getElementById('btn-goto-health-feedback').addEventListener('click', () => navigateTo('health', activePet.id));
+  }
+
+  // INTERACTIVE CARD STACK SWIPER ENGINE
+  function initCardStack(stackContainer, cardData) {
+    if (!stackContainer || cardData.length === 0) return;
+    stackContainer.innerHTML = '';
+    
+    _stackEls = [];
+    _stackOrder = cardData.map((_, i) => i);
+
+    cardData.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.style.cssText = `
+        position:absolute;left:0;right:0;top:0;
+        height:210px;border-radius:20px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        overflow:hidden;
+        will-change:transform,opacity;
+        cursor:grab;
+        user-select:none;
+        -webkit-user-select:none;
+        touch-action:none;
+      `;
+      
+      el.innerHTML = `
+        <!-- Background Image/emoji -->
+        ${c.isReal ? `
+          <img src="${c.imageUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;">
+        ` : `
+          <div style="position:absolute;inset:0;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:4.5rem;color:white;pointer-events:none;">
+            ${c.emoji}
+          </div>
+        `}
+
+        <!-- Dark Gradient Overlay -->
+        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(17,24,39,0.9) 0%, rgba(17,24,39,0.3) 60%, transparent 100%);pointer-events:none;"></div>
+
+        <!-- Heart Vote Button (Absolute top right) -->
+        <button class="btn-vote-heart-stack" data-id="${c.id}" style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);z-index:10;color:white;">
+          <span class="material-symbols-rounded" style="font-size:16px;">favorite</span>
+        </button>
+
+        <!-- Portrait Info overlay (Bottom) -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;pointer-events:none;z-index:5;">
+          <div style="font-size:1.15rem;font-weight:800;color:white;line-height:1.2;text-shadow:0 2px 4px rgba(0,0,0,0.6);">${c.name}</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:2px;display:flex;justify-content:space-between;align-items:center;">
+            <span>${c.owner}</span>
+            <span style="font-weight:600;color:white;display:flex;align-items:center;gap:3px;">
+              ❤️ <strong class="vote-count">${c.votes}</strong> votos
+            </span>
+          </div>
+        </div>
+      `;
+
+      // Connect absolute heart button click inside the card
+      const voteBtn = el.querySelector('.btn-vote-heart-stack');
+      voteBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent opening full preview
+        const countSpan = voteBtn.querySelector('.vote-count');
+        const icon = voteBtn.querySelector('.material-symbols-rounded');
+        const isVoted = icon.classList.contains('voted-heart');
+        
+        if (isVoted) {
+          icon.classList.remove('voted-heart');
+          c.votes--;
+        } else {
+          icon.classList.add('voted-heart');
+          c.votes++;
+          showToast(`¡Voto registrado para el retrato de ${c.name}!`);
+        }
+        countSpan.textContent = c.votes;
+      });
+
+      stackContainer.appendChild(el);
+      _stackEls.push(el);
+    });
+
+    renderStack(false, 0);
+    attachDrag(stackContainer);
+  }
+
+  function stackTransform(pos, dy) {
+    const scale = 1 - pos * 0.05;
+    const translateY = pos * -10 + (pos === 0 ? dy : Math.max(0, dy * 0.12 * (1 - pos * 0.3)));
+    const opacity = pos >= 3 ? 0 : 1 - pos * 0.15;
+    const rotations = [0, -1.5, 2, -1];
+    const rotateZ = rotations[pos] || 0;
+    return { scale, translateY, opacity, rotateZ };
+  }
+
+  function renderStack(animate, dy = 0) {
+    _stackOrder.forEach((cardIdx, pos) => {
+      const el = _stackEls[cardIdx];
+      if (!el) return;
+      const { scale, translateY, opacity, rotateZ } = stackTransform(pos, dy);
+      
+      if (animate) {
+        el.style.transition = 'transform 0.4s cubic-bezier(0.34,1.2,0.64,1), opacity 0.3s ease';
+      } else {
+        el.style.transition = pos === 0 ? 'none' : 'transform 0.4s cubic-bezier(0.34,1.2,0.64,1), opacity 0.3s ease';
+      }
+      
+      el.style.transform = `translateY(${translateY}px) scale(${scale}) rotate(${rotateZ}deg)`;
+      el.style.opacity = opacity;
+      el.style.zIndex = 100 - pos;
+    });
+  }
+
+  function attachDrag(stackContainer) {
+    function onStart(y) {
+      if (_stackOrder.length === 0) return;
+      const frontEl = _stackEls[_stackOrder[0]];
+      _dragActive = true;
+      _dragStartY = y;
+      _dragCurrY = 0;
+      _dragPrevY = y;
+      _dragVel = 0;
+      frontEl.style.transition = 'none';
+      frontEl.style.cursor = 'grabbing';
+    }
+
+    function onMove(y) {
+      if (!_dragActive) return;
+      _dragVel = y - _dragPrevY;
+      _dragPrevY = y;
+      _dragCurrY = y - _dragStartY;
+      if (_dragCurrY < 0) _dragCurrY = _dragCurrY * 0.2; // Drag resistance upwards
+      renderStack(false, _dragCurrY);
+    }
+
+    function onEnd() {
+      if (!_dragActive) return;
+      _dragActive = false;
+      const frontEl = _stackEls[_stackOrder[0]];
+      if (!frontEl) return;
+      frontEl.style.cursor = 'grab';
+
+      const THRESHOLD = 65;
+      if (_dragCurrY > THRESHOLD || _dragVel > 8) {
+        frontEl.style.transition = 'transform 0.35s cubic-bezier(0.4,0,1,1), opacity 0.25s ease';
+        frontEl.style.transform = `translateY(280px) scale(0.85)`;
+        frontEl.style.opacity = '0';
+        
+        setTimeout(() => {
+          const dismissed = _stackOrder.shift();
+          _stackOrder.push(dismissed);
+          renderStack(true, 0);
+        }, 350);
+      } else {
+        renderStack(true, 0);
+      }
+      _dragCurrY = 0;
+    }
+
+    // Touch events listeners
+    let _tStartY = 0;
+    stackContainer.addEventListener('touchstart', e => {
+      _tStartY = e.touches[0].clientY;
+      onStart(_tStartY);
+    }, { passive: true });
+
+    stackContainer.addEventListener('touchmove', e => {
+      onMove(e.touches[0].clientY);
+    }, { passive: true });
+
+    stackContainer.addEventListener('touchend', e => {
+      const wasTap = Math.abs(e.changedTouches[0].clientY - _tStartY) < 10;
+      onEnd();
+      if (wasTap) {
+        const frontCard = communityPortraits[_stackOrder[0]];
+        if (frontCard && frontCard.isReal) {
+          openPreviewModal(frontCard.imageUrl);
+        }
+      }
+    }, { passive: true });
+
+    // Mouse events (Desktop)
+    stackContainer.addEventListener('mousedown', e => {
+      if (e.target.closest('.btn-vote-heart-stack')) return; // let absolute click run
+      e.preventDefault();
+      const startY = e.clientY;
+      onStart(startY);
+
+      const onMouseMove = ev => onMove(ev.clientY);
+      const onMouseUp = ev => {
+        const wasTap = Math.abs(ev.clientY - startY) < 8;
+        onEnd();
+        if (wasTap) {
+          const frontCard = communityPortraits[_stackOrder[0]];
+          if (frontCard && frontCard.isReal) {
+            openPreviewModal(frontCard.imageUrl);
+          }
+        }
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
   }
 
   // Render the Smart Reorder block
