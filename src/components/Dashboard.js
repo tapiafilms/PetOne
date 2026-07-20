@@ -295,8 +295,12 @@ export async function renderDashboard(container) {
     petCard.innerHTML = `
       <div style="position: absolute; top: 0; right: 0; width: 120px; height: 120px; background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%); pointer-events: none;"></div>
       <div style="display: flex; gap: 1rem; align-items: center;">
-        <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #818cf8); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
-          ${activePet.species === 'perro' ? '🐶' : '🐱'}
+        <div style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, var(--primary), #818cf8); display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0;">
+          ${activePet.photo ? `
+            <img src="${activePet.photo}" style="width: 100%; height: 100%; object-fit: cover;">
+          ` : `
+            <span style="font-size: 2rem;">${activePet.species === 'perro' ? '🐶' : '🐱'}</span>
+          `}
         </div>
         <div style="flex: 1;">
           <div style="display: flex; align-items: center; gap: 8px;">
