@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS public.pets (
     allergies TEXT,
     diagnosis TEXT,
     diagnosis_staff TEXT,
+    photo TEXT,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 

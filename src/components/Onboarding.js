@@ -102,6 +102,9 @@ export function renderOnboarding(container) {
   }
 
   // STEP 2: Pet Profiling (Supports adding multiple pets)
+  // STEP 2: Pet Profiling (Supports adding multiple pets)
+  let _tempPetPhoto = null;
+
   function renderStep2(parent) {
     parent.innerHTML = `
       <h2 style="margin-bottom: 1.25rem;"><span class="material-symbols-rounded">pets</span> Perfil de Mascotas</h2>
@@ -116,6 +119,19 @@ export function renderOnboarding(container) {
           <span class="material-symbols-rounded">add_circle</span> Nueva Mascota
         </h3>
         
+        <!-- Pet Photo Upload Section -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 1rem;">
+          <div id="onb-pet-photo-zone" style="width: 72px; height: 72px; border-radius: 50%; border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: var(--bg-secondary);">
+            <div id="onb-pet-photo-ph" style="display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-align: center;">
+              <span class="material-symbols-rounded" style="font-size: 24px;">add_a_photo</span>
+              <span style="font-size: 0.55rem; font-weight: bold; margin-top: 2px;">Subir Foto</span>
+            </div>
+            <div id="onb-pet-photo-prev" style="position: absolute; inset: 0; display: none;"></div>
+          </div>
+          <input type="file" id="onb-pet-photo-input" accept="image/*" style="display: none;">
+          <span style="font-size: 0.65rem; color: var(--text-muted);">Foto de perfil (Opcional)</span>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
           <div class="input-group">
             <label class="input-label">Nombre</label>
@@ -176,6 +192,52 @@ export function renderOnboarding(container) {
 
     const addedList = document.getElementById('added-pets-list');
     
+    // Connect Photo Selector
+    const photoZone = document.getElementById('onb-pet-photo-zone');
+    const photoInput = document.getElementById('onb-pet-photo-input');
+    const photoPh = document.getElementById('onb-pet-photo-ph');
+    const photoPrev = document.getElementById('onb-pet-photo-prev');
+
+    photoZone.addEventListener('click', () => photoInput.click());
+
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          // Compress pet image using canvas
+          const sizeLimit = 256;
+          let w = img.width;
+          let h = img.height;
+          if (w > sizeLimit || h > sizeLimit) {
+            if (w > h) {
+              h = Math.round((h * sizeLimit) / w);
+              w = sizeLimit;
+            } else {
+              w = Math.round((w * sizeLimit) / h);
+              h = sizeLimit;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          _tempPetPhoto = canvas.toDataURL('image/jpeg', 0.85);
+
+          photoPrev.innerHTML = `<img src="${_tempPetPhoto}" style="width: 100%; height: 100%; object-fit: cover; display: block;">`;
+          photoPrev.style.display = 'block';
+          photoPh.style.display = 'none';
+          photoZone.style.borderColor = 'var(--secondary)';
+          photoZone.style.borderStyle = 'solid';
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
     function refreshPetsList() {
       if (petsList.length === 0) {
         addedList.innerHTML = `<p style="font-style: italic; color: var(--text-muted); text-align: center;">Aún no has agregado mascotas.</p>`;
@@ -184,12 +246,20 @@ export function renderOnboarding(container) {
       
       addedList.innerHTML = petsList.map((p, idx) => `
         <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 10px;">
-          <div>
-            <div style="font-weight: 600; display: flex; align-items: center; gap: 6px;">
-              <span class="material-symbols-rounded" style="font-size: 16px; color: var(--primary);">${p.species === 'perro' ? 'pets' : 'explore'}</span>
-              ${p.name}
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
+              ${p.photo ? `
+                <img src="${p.photo}" style="width: 100%; height: 100%; object-fit: cover;">
+              ` : `
+                <span style="font-size: 1.1rem;">${p.species === 'perro' ? '🐶' : '🐱'}</span>
+              `}
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary);">${p.breed} • ${p.age} años • ${p.weight} kg</div>
+            <div>
+              <div style="font-weight: 600; font-size: 0.85rem;">
+                ${p.name}
+              </div>
+              <div style="font-size: 0.7rem; color: var(--text-secondary);">${p.breed} • ${p.age} años • ${p.weight} kg</div>
+            </div>
           </div>
           <button class="btn btn-secondary btn-icon delete-btn" data-idx="${idx}" style="width: 32px; height: 32px; border-radius: 6px;">
             <span class="material-symbols-rounded" style="font-size: 16px; color: var(--danger);">delete</span>
@@ -231,7 +301,8 @@ export function renderOnboarding(container) {
         age,
         size,
         weight,
-        allergies
+        allergies,
+        photo: _tempPetPhoto
       });
 
       // Clear pet fields
@@ -240,6 +311,14 @@ export function renderOnboarding(container) {
       document.getElementById('pet-age').value = '';
       document.getElementById('pet-weight').value = '';
       document.getElementById('pet-allergies').value = '';
+      
+      // Reset Photo Preview
+      _tempPetPhoto = null;
+      photoPrev.innerHTML = '';
+      photoPrev.style.display = 'none';
+      photoPh.style.display = 'flex';
+      photoZone.style.borderColor = 'var(--border-color)';
+      photoZone.style.borderStyle = 'dashed';
 
       refreshPetsList();
     });

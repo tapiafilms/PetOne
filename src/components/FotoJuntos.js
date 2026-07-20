@@ -131,6 +131,7 @@ export async function renderFotoJuntos(container) {
     const petSelect = document.getElementById('juntos-select-pet');
     petSelect.addEventListener('change', (e) => {
       _selectedPetId = e.target.value;
+      loadSelectedPetPhoto();
     });
 
     const zm = document.getElementById('juntos-z-mascota');
@@ -159,6 +160,31 @@ export async function renderFotoJuntos(container) {
 
     const genBtn = document.getElementById('juntos-btn-generate');
     genBtn.addEventListener('click', () => processFusion());
+
+    function loadSelectedPetPhoto() {
+      const selectedPet = pets.find(p => p.id === _selectedPetId);
+      if (selectedPet && selectedPet.photo) {
+        _jFotoMascota = selectedPet.photo;
+        setUploadPreview('juntos-prev-mascota', 'juntos-ph-mascota', 'juntos-z-mascota', selectedPet.photo);
+        checkReadyState();
+      } else {
+        _jFotoMascota = null;
+        const prev = document.getElementById('juntos-prev-mascota');
+        const ph = document.getElementById('juntos-ph-mascota');
+        const zone = document.getElementById('juntos-z-mascota');
+        if (prev && ph && zone) {
+          prev.innerHTML = '';
+          prev.style.display = 'none';
+          ph.style.display = 'flex';
+          zone.style.borderColor = 'var(--border-color)';
+          zone.style.borderStyle = 'dashed';
+        }
+        checkReadyState();
+      }
+    }
+
+    // Pre-populate on render
+    loadSelectedPetPhoto();
 
     // 6. User Gallery at bottom
     renderGallery();

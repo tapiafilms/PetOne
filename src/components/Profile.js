@@ -1,6 +1,6 @@
 // Profile Component for user details, loyalty points and quick access to health tracker and subscriptions
-import { getProfile, getPets } from '../utils/db.js';
-import { navigateTo } from '../main.js';
+import { getProfile, getPets, addPet } from '../utils/db.js';
+import { navigateTo, showToast } from '../main.js';
 
 export async function renderProfile(container) {
   const profile = await getProfile();
@@ -12,6 +12,18 @@ export async function renderProfile(container) {
     if (!profile) {
       container.innerHTML = `<p>Error: Perfil no encontrado.</p>`;
       return;
+    }
+
+    // Add extra CSS styles for Profile hover state if not exists
+    if (!document.getElementById('profile-extra-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'profile-extra-styles';
+      styles.innerHTML = `
+        .pet-photo-uploader:hover .hover-overlay {
+          opacity: 1 !important;
+        }
+      `;
+      document.head.appendChild(styles);
     }
 
     // Header
@@ -60,7 +72,17 @@ export async function renderProfile(container) {
         ${pets.map(pet => `
           <div class="card" style="margin-bottom: 0; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.5rem;">${pet.species === 'perro' ? '🐶' : '🐱'}</span>
+              <!-- Interactive Profile Photo Uploader -->
+              <div class="pet-photo-uploader" data-id="${pet.id}" style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;" title="Cambiar Foto">
+                ${pet.photo ? `
+                  <img src="${pet.photo}" style="width: 100%; height: 100%; object-fit: cover;">
+                ` : `
+                  <span style="font-size: 1.3rem;">${pet.species === 'perro' ? '🐶' : '🐱'}</span>
+                `}
+                <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" class="hover-overlay">
+                  <span class="material-symbols-rounded" style="color: white; font-size: 14px;">photo_camera</span>
+                </div>
+              </div>
               <div>
                 <strong style="font-size: 0.85rem;">${pet.name}</strong>
                 <p style="font-size: 0.7rem; color: var(--text-secondary);">${pet.breed} • ${pet.age} años</p>
@@ -74,6 +96,63 @@ export async function renderProfile(container) {
       </div>
     `;
     container.appendChild(petsSection);
+
+    // Create a hidden file input for photo uploading
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    container.appendChild(fileInput);
+    
+    let activeUploadPetId = null;
+
+    petsSection.querySelectorAll('.pet-photo-uploader').forEach(wrapper => {
+      wrapper.addEventListener('click', () => {
+        activeUploadPetId = wrapper.dataset.id;
+        fileInput.click();
+      });
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file || !activeUploadPetId) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = async () => {
+          // Resize and compress pet photo to max 256x256 to save space and fast DB syncs
+          const sizeLimit = 256;
+          let w = img.width;
+          let h = img.height;
+          if (w > sizeLimit || h > sizeLimit) {
+            if (w > h) {
+              h = Math.round((h * sizeLimit) / w);
+              w = sizeLimit;
+            } else {
+              w = Math.round((w * sizeLimit) / h);
+              h = sizeLimit;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+          // Find pet in local list and update it
+          const pet = pets.find(p => p.id === activeUploadPetId);
+          if (pet) {
+            pet.photo = compressedBase64;
+            await addPet(pet);
+            showToast(`¡Foto de ${pet.name} actualizada con éxito!`);
+            renderProfile(container);
+          }
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
     // General Menu Actions
     const menuActions = document.createElement('div');
