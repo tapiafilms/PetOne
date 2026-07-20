@@ -27,7 +27,8 @@ export async function renderDashboard(container) {
   const stories = [
     { id: 'story-1', title: 'Unboxing Kong', emoji: '📦', videoTitle: 'Kong Classic en Acción', label: 'Ver Juguetes', targetView: 'catalog', productType: 'Juguetes' },
     { id: 'story-2', title: 'Spa de Toby', emoji: '🛁', videoTitle: 'Corte y Lavado Oster', label: 'Agendar Cita', targetView: 'services', productType: '' },
-    { id: 'story-3', title: 'Comida VIP', emoji: '🍖', videoTitle: 'Nutrición Royal Canin', label: 'Ver Alimento', targetView: 'catalog', productType: 'Alimentos' }
+    { id: 'story-3', title: 'Comida VIP', emoji: '🍖', videoTitle: 'Nutrición Royal Canin', label: 'Ver Alimento', targetView: 'catalog', productType: 'Alimentos' },
+    { id: 'story-4', title: 'Juntos IA', emoji: '✨', videoTitle: 'Retrato Mágico con tu Mascota', label: 'Probar IA', targetView: 'juntos', productType: '' }
   ];
 
   // Mock Contest Contestants

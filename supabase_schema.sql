@@ -83,6 +83,14 @@ CREATE TABLE IF NOT EXISTS public.retail_media_logs (
     clicks INTEGER DEFAULT 0
 );
 
+-- 8. Tabla de Galería de Fotos IA (Juntos IA)
+CREATE TABLE IF NOT EXISTS public.ai_photos (
+    id TEXT PRIMARY KEY,
+    pet_id TEXT,
+    image_url TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
 -- ================= POLÍTICAS RLS (RESOLVER ADVISOR) =================
 
 -- Opción Recomendada: Habilitar políticas de acceso público (Lectura/Escritura) para el API Anon Key
@@ -93,3 +101,4 @@ CREATE POLICY "Permitir todo a subscriptions" ON public.subscriptions FOR ALL US
 CREATE POLICY "Permitir todo a appointments" ON public.appointments FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Permitir todo a scan_logs" ON public.scan_logs FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Permitir todo a retail_media_logs" ON public.retail_media_logs FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir todo a ai_photos" ON public.ai_photos FOR ALL USING (true) WITH CHECK (true);

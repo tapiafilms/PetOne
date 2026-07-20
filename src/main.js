@@ -11,6 +11,7 @@ import { renderAIAssistant } from './components/AIAssistant.js';
 import { renderAnalytics } from './components/Analytics.js';
 import { renderCommunity } from './components/Community.js';
 import { renderProfile } from './components/Profile.js';
+import { renderFotoJuntos } from './components/FotoJuntos.js';
 
 // Global State
 window.appState = {
@@ -82,6 +83,8 @@ export async function navigateTo(view, extraData = null) {
     await renderCommunity(pageContainer);
   } else if (view === 'profile') {
     await renderProfile(pageContainer);
+  } else if (view === 'juntos') {
+    await renderFotoJuntos(pageContainer);
   }
 }
 

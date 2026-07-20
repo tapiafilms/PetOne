@@ -2,7 +2,7 @@
 import { supabase } from './supabaseClient.js';
 
 const DB_NAME = 'petone_db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let dbPromise = null;
 
@@ -52,6 +52,13 @@ function getDB() {
         }
         if (!db.objectStoreNames.contains('retailMedia')) {
           db.createObjectStore('retailMedia', { keyPath: 'id' });
+        }
+      }
+
+      // Version 4 stores
+      if (oldVersion < 4) {
+        if (!db.objectStoreNames.contains('aiPhotos')) {
+          db.createObjectStore('aiPhotos', { keyPath: 'id' });
         }
       }
     };
@@ -405,6 +412,57 @@ export async function saveRetailMediaPerformance(mediaLog) {
         clicks: mediaLog.clicks
       };
       syncToCloud('retail_media_logs', mappedRecord);
+      resolve();
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// AI PHOTOS OPERATIONS
+export async function getAiPhotos() {
+  const db = await getDB();
+  return new Promise((resolve) => {
+    const transaction = db.transaction('aiPhotos', 'readonly');
+    const store = transaction.objectStore('aiPhotos');
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const results = request.result || [];
+      results.sort((a, b) => b.timestamp - a.timestamp);
+      resolve(results);
+    };
+    request.onerror = () => resolve([]);
+  });
+}
+
+export async function addAiPhoto(photo) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('aiPhotos', 'readwrite');
+    const store = transaction.objectStore('aiPhotos');
+    const request = store.put(photo);
+    request.onsuccess = () => {
+      const mappedRecord = {
+        id: photo.id,
+        pet_id: photo.petId,
+        image_url: photo.imageUrl
+      };
+      syncToCloud('ai_photos', mappedRecord);
+      resolve();
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function deleteAiPhoto(photoId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('aiPhotos', 'readwrite');
+    const store = transaction.objectStore('aiPhotos');
+    const request = store.delete(photoId);
+    request.onsuccess = async () => {
+      if (supabase && navigator.onLine) {
+        await supabase.from('ai_photos').delete().eq('id', photoId);
+      }
       resolve();
     };
     request.onerror = () => reject(request.error);
