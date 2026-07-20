@@ -1,6 +1,6 @@
 // Dashboard Component for "Mis Mascotas" overview, smart recompra, ticket scanning, health diaries, subscriptions and Phase 3 upgrades (Retail Media + AI)
-// Added: Reels/Stories (Instagram style), Daily Trivia (+10 points), Pet Photo Contest, and SOS Lost Pets bulletin.
-import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog } from '../utils/db.js';
+// Added: Reels/Stories (Instagram style), Daily Trivia (+10 points), community AI portraits feed (Últimos Retratos IA), and SOS lost pets bulletin.
+import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog, getCommunityPhotos } from '../utils/db.js';
 import { TIPS_AND_CARE, PRODUCTS } from '../data/mockData.js';
 import { navigateTo, showToast } from '../main.js';
 
@@ -9,6 +9,7 @@ export async function renderDashboard(container) {
   const pets = await getPets();
   const purchases = await getPurchases();
   const subscriptions = await getSubscriptions();
+  const communityPhotos = await getCommunityPhotos();
 
   // Primary pet selected (defaults to first pet)
   let activePetIndex = 0;
@@ -31,11 +32,26 @@ export async function renderDashboard(container) {
     { id: 'story-4', title: 'Juntos IA', emoji: '✨', videoTitle: 'Retrato Mágico con tu Mascota', label: 'Probar IA', targetView: 'juntos', productType: '' }
   ];
 
-  // Mock Contest Contestants
-  let contestants = [
-    { id: 'cont-1', name: 'Coco', owner: '@goldencoco', votes: 142, emoji: '🦮', color: 'linear-gradient(135deg, #fef08a 0%, #ca8a04 100%)' },
-    { id: 'cont-2', name: 'Milo', owner: '@milothecat', votes: 98, emoji: '🐈', color: 'linear-gradient(135deg, #fed7aa 0%, #ea580c 100%)' }
-  ];
+  // Community AI Portraits List (Uses real pictures from DB/Supabase or falls back to mock)
+  let communityPortraits = [];
+  if (communityPhotos && communityPhotos.length > 0) {
+    communityPortraits = communityPhotos.map((ph, idx) => {
+      const pet = pets.find(p => p.id === ph.petId);
+      return {
+        id: ph.id,
+        name: pet ? pet.name : 'Mascota',
+        owner: `@creador_ia`,
+        votes: 18 + (idx * 4),
+        imageUrl: ph.imageUrl,
+        isReal: true
+      };
+    });
+  } else {
+    communityPortraits = [
+      { id: 'cont-1', name: 'Coco', owner: '@goldencoco', votes: 142, emoji: '🦮', color: 'linear-gradient(135deg, #fef08a 0%, #ca8a04 100%)', isReal: false },
+      { id: 'cont-2', name: 'Milo', owner: '@milothecat', votes: 98, emoji: '🐈', color: 'linear-gradient(135deg, #fed7aa 0%, #ea580c 100%)', isReal: false }
+    ];
+  }
 
   // Mock SOS Lost Pets
   const lostPets = [
@@ -427,22 +443,28 @@ export async function renderDashboard(container) {
     `;
     container.appendChild(scanGoCard);
 
-    // 4. Concurso: Mascota de la Semana (Photo Contest)
+    // 4. Últimos Retratos IA (Public Community Feed)
     const contestSection = document.createElement('div');
     contestSection.style.marginBottom = '1.5rem';
     contestSection.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h2><span class="material-symbols-rounded" style="color: var(--accent);">star</span> Mascota de la Semana</h2>
-        <button id="btn-contest-upload" class="btn btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; width: auto; border-radius: 6px;">
-          <span class="material-symbols-rounded" style="font-size: 14px;">photo_camera</span> Subir Foto
-        </button>
+        <h2><span class="material-symbols-rounded" style="color: var(--accent);">auto_awesome</span> Últimos Retratos IA</h2>
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        ${contestants.map(c => `
+        ${communityPortraits.slice(0, 4).map(c => `
           <div class="glass-card" style="padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative;">
-            <div style="width: 100%; height: 100px; border-radius: 8px; background: ${c.color}; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin-bottom: 8px;">
-              ${c.emoji}
-            </div>
+            
+            <!-- Real photo vs Emoji card representation -->
+            ${c.isReal ? `
+              <div style="width: 100%; height: 100px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; cursor: pointer;" class="btn-community-portrait-view" data-url="${c.imageUrl}">
+                <img src="${c.imageUrl}" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+              </div>
+            ` : `
+              <div style="width: 100%; height: 100px; border-radius: 8px; background: ${c.color}; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin-bottom: 8px;">
+                ${c.emoji}
+              </div>
+            `}
+
             <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; font-size: 0.75rem;">
               <div>
                 <strong>${c.name}</strong>
@@ -467,7 +489,7 @@ export async function renderDashboard(container) {
         const countSpan = btn.querySelector('.vote-count');
         const isVoted = icon.classList.contains('voted-heart');
         
-        const c = contestants.find(x => x.id === cId);
+        const c = communityPortraits.find(x => x.id === cId);
         if (!c) return;
 
         if (isVoted) {
@@ -476,15 +498,20 @@ export async function renderDashboard(container) {
         } else {
           icon.classList.add('voted-heart');
           c.votes++;
-          showToast(`¡Voto registrado para ${c.name}!`);
+          showToast(`¡Voto registrado para el retrato de ${c.name}!`);
         }
         countSpan.textContent = c.votes;
       });
     });
 
-    document.getElementById('btn-contest-upload').addEventListener('click', () => openPhotoUploadModal());
+    // Modal view handler for real portraits
+    contestSection.querySelectorAll('.btn-community-portrait-view').forEach(img => {
+      img.addEventListener('click', () => {
+        openPreviewModal(img.dataset.url);
+      });
+    });
 
-    // 5. SOS Mascotas Perdidas Bulletin
+    // SOS Mascotas Perdidas Bulletin
     const sosSection = document.createElement('div');
     sosSection.style.marginBottom = '1.5rem';
     sosSection.innerHTML = `
@@ -1025,57 +1052,22 @@ export async function renderDashboard(container) {
     });
   }
 
-  // PHOTO CONTEST UPLOAD MODAL
-  function openPhotoUploadModal() {
+  // IMAGE PREVIEW MODAL FOR PORTRAITS
+  function openPreviewModal(url) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
-    document.body.appendChild(overlay);
-
+    overlay.style.zIndex = '5000';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     overlay.innerHTML = `
-      <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-          <h2 style="margin: 0;"><span class="material-symbols-rounded">photo_camera</span> Subir Foto al Concurso</h2>
-          <button id="btn-close-upload" class="btn btn-secondary btn-icon" style="width: 32px; height: 32px; border-radius: 50%;">
-            <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
-          </button>
-        </div>
-
-        <div style="background-color: black; border-radius: 12px; height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; margin-bottom: 1.25rem; border: 2px dashed var(--accent);">
-          <span class="material-symbols-rounded" style="font-size: 44px; color: var(--accent);">add_photo_alternate</span>
-          <span style="color: #cbd5e1; font-size: 0.8rem; margin-top: 8px;">Selecciona o captura la foto de tu mascota</span>
-        </div>
-
-        <div class="input-group">
-          <label class="input-label">Nombre de tu Mascota</label>
-          <input type="text" id="contest-pet-name" class="input-field" placeholder="Ej. Toby" value="${activePet.name}">
-        </div>
-
-        <div class="input-group" style="margin-bottom: 1.5rem;">
-          <label class="input-label">Tu Usuario de Instagram / Red Social</label>
-          <input type="text" id="contest-owner-handle" class="input-field" placeholder="Ej. @toby_the_dog" value="@tutor_${profile.name.toLowerCase()}">
-        </div>
-
-        <button id="btn-submit-photo" class="btn btn-primary" style="background-color: var(--accent); box-shadow: none;">
-          <span class="material-symbols-rounded" style="font-size: 18px;">upload</span>
-          Subir y Participar
+      <div style="position: relative; max-width: 380px; width: 100%; border-radius: 20px; overflow: hidden; background: var(--bg-secondary); border: 1px solid var(--border-color); box-shadow: 0 12px 36px rgba(0,0,0,0.5); padding: 12px;">
+        <img src="${url}" style="width: 100%; border-radius: 12px; display: block;" alt="Retrato IA">
+        <button id="btn-close-prev" class="btn btn-secondary btn-icon" style="position: absolute; top: 20px; right: 20px; width: 32px; height: 32px; border-radius: 50%;">
+          <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
         </button>
       </div>
     `;
-
-    document.getElementById('btn-close-upload').addEventListener('click', () => overlay.remove());
-
-    document.getElementById('btn-submit-photo').addEventListener('click', () => {
-      const name = document.getElementById('contest-pet-name').value.trim();
-      const handle = document.getElementById('contest-owner-handle').value.trim();
-
-      if (!name || !handle) {
-        alert('Por favor completa todos los campos.');
-        return;
-      }
-
-      showToast(`¡Foto de ${name} subida con éxito! Ya estás participando.`);
-      overlay.remove();
-    });
+    document.body.appendChild(overlay);
+    document.getElementById('btn-close-prev').addEventListener('click', () => overlay.remove());
   }
 
   // SOS ALERTS DETAILS MODAL

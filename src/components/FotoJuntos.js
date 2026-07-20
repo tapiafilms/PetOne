@@ -308,7 +308,7 @@ export async function renderFotoJuntos(container) {
         </div>
         <div style="display: flex; gap: 8px;">
           <button id="juntos-btn-save" class="btn btn-primary" style="flex: 2; font-weight: bold; background: linear-gradient(135deg, var(--primary), var(--secondary));">
-            💾 Guardar en Mi Galería
+            🐾 Publicar en la Comunidad
           </button>
           <button id="juntos-btn-share" class="btn btn-secondary btn-icon" style="width: 44px; height: 44px; flex-shrink: 0;" title="Compartir">
             <span class="material-symbols-rounded" style="font-size: 18px;">share</span>
@@ -341,13 +341,18 @@ export async function renderFotoJuntos(container) {
           timestamp: Date.now()
         });
 
-        showToast('¡Foto guardada en tu galería local y sincronizada!');
-        saveBtn.innerHTML = '✓ Guardado';
+        showToast('¡Foto publicada en la comunidad de PetOne!');
+        saveBtn.innerHTML = '✓ Publicada';
         saveBtn.style.backgroundColor = 'var(--secondary)';
         
         // Refresh Gallery
         aiPhotos = await getAiPhotos();
         renderGallery();
+        
+        // Redirect to dashboard after a short delay so they see the published photo in the feed
+        setTimeout(() => {
+          navigateTo('dashboard');
+        }, 1200);
       });
 
     } catch (err) {

@@ -468,3 +468,21 @@ export async function deleteAiPhoto(photoId) {
     request.onerror = () => reject(request.error);
   });
 }
+
+// FETCH PUBLIC AI COMMUNITY PHOTOS
+export async function getCommunityPhotos() {
+  if (!supabase || !navigator.onLine) return [];
+  try {
+    const { data, error } = await supabase
+      .from('ai_photos')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10);
+      
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.warn('[Supabase getCommunityPhotos Error]:', err);
+    return [];
+  }
+}
