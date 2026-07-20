@@ -172,41 +172,6 @@ export async function renderDashboard(container) {
       });
     });
 
-    // 2. Retail Media Banner (Sponsor)
-    const adBanner = document.createElement('div');
-    adBanner.className = 'glass-card';
-    adBanner.style.border = '1px solid rgba(79, 70, 229, 0.3)';
-    adBanner.style.background = 'linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(17, 24, 39, 0.7) 100%)';
-    adBanner.style.padding = '10px 14px';
-    adBanner.style.marginBottom = '1.25rem';
-    adBanner.style.cursor = 'pointer';
-    adBanner.style.position = 'relative';
-    adBanner.innerHTML = `
-      <span style="position: absolute; right: 10px; top: 8px; font-size: 0.6rem; text-transform: uppercase; color: var(--primary); font-weight: 700; border: 1px solid var(--primary); padding: 1px 4px; border-radius: 4px;">Patrocinado</span>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="material-symbols-rounded" style="color: var(--primary); font-size: 28px;">campaign</span>
-        <div>
-          <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary);">${currentAd.sponsor}</h4>
-          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 1px;">${currentAd.title}. ${currentAd.desc}</p>
-        </div>
-      </div>
-    `;
-    container.appendChild(adBanner);
-
-    adBanner.addEventListener('click', async () => {
-      try {
-        await saveRetailMediaPerformance({
-          id: currentAd.id,
-          sponsor: currentAd.sponsor,
-          impressions: 1,
-          clicks: 1
-        });
-      } catch(err) {}
-      
-      navigateTo('catalog');
-      showToast(`Redirigiendo a oferta patrocinada por ${currentAd.sponsor}`);
-    });
-
     // Welcoming Header
     const welcomeSection = document.createElement('div');
     welcomeSection.style.marginBottom = '1.25rem';
@@ -342,6 +307,27 @@ export async function renderDashboard(container) {
       </div>
     `;
     container.appendChild(petCard);
+
+    // 2. IA Photo Creator Banner (Moved from Community)
+    const iaBanner = document.createElement('div');
+    iaBanner.className = 'glass-card';
+    iaBanner.style.background = 'linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(17, 24, 39, 0.7) 100%)';
+    iaBanner.style.border = '1px solid rgba(147, 51, 234, 0.3)';
+    iaBanner.style.padding = '14px';
+    iaBanner.style.marginBottom = '1.25rem';
+    iaBanner.style.cursor = 'pointer';
+    iaBanner.innerHTML = `
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 2.2rem; filter: drop-shadow(0 0 6px rgba(147, 51, 234, 0.6));">✨</span>
+        <div style="flex: 1;">
+          <h4 style="font-size: 0.95rem; font-weight: bold; margin: 0; color: white;">¡Juntos con IA!</h4>
+          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Une la foto de tu mascota con tu selfie en paisajes hermosos utilizando Inteligencia Artificial.</p>
+        </div>
+        <span class="material-symbols-rounded" style="color: var(--secondary); font-size: 20px;">chevron_right</span>
+      </div>
+    `;
+    container.appendChild(iaBanner);
+    iaBanner.addEventListener('click', () => navigateTo('juntos'));
 
     // 3. Trivia Diaria de Salud Card
     const triviaCard = document.createElement('div');

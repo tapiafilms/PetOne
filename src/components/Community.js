@@ -49,27 +49,6 @@ export async function renderCommunity(container) {
 
     document.getElementById('btn-back-to-dash-com').addEventListener('click', () => navigateTo('dashboard'));
 
-    // IA Photo Creator Banner
-    const iaBanner = document.createElement('div');
-    iaBanner.className = 'glass-card';
-    iaBanner.style.background = 'linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(17, 24, 39, 0.7) 100%)';
-    iaBanner.style.border = '1px solid rgba(147, 51, 234, 0.3)';
-    iaBanner.style.padding = '14px';
-    iaBanner.style.marginBottom = '1.25rem';
-    iaBanner.style.cursor = 'pointer';
-    iaBanner.innerHTML = `
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <span style="font-size: 2.2rem; filter: drop-shadow(0 0 6px rgba(147, 51, 234, 0.6));">✨</span>
-        <div style="flex: 1;">
-          <h4 style="font-size: 0.95rem; font-weight: bold; margin: 0; color: white;">¡Juntos con IA!</h4>
-          <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Une la foto de tu mascota con tu selfie en paisajes hermosos utilizando Inteligencia Artificial.</p>
-        </div>
-        <span class="material-symbols-rounded" style="color: var(--secondary); font-size: 20px;">chevron_right</span>
-      </div>
-    `;
-    container.appendChild(iaBanner);
-    iaBanner.addEventListener('click', () => navigateTo('juntos'));
-
     // Guides Feed
     const feed = document.createElement('div');
     feed.style.display = 'flex';
