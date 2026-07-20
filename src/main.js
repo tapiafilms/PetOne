@@ -10,6 +10,7 @@ import { renderHealthTracker } from './components/HealthTracker.js';
 import { renderAIAssistant } from './components/AIAssistant.js';
 import { renderAnalytics } from './components/Analytics.js';
 import { renderCommunity } from './components/Community.js';
+import { renderProfile } from './components/Profile.js';
 
 // Global State
 window.appState = {
@@ -79,6 +80,8 @@ export async function navigateTo(view, extraData = null) {
     await renderAnalytics(pageContainer);
   } else if (view === 'community') {
     await renderCommunity(pageContainer);
+  } else if (view === 'profile') {
+    await renderProfile(pageContainer);
   }
 }
 
@@ -98,6 +101,9 @@ function renderAppShell() {
         </button>
         <button id="btn-header-analytics" class="btn btn-secondary btn-icon" title="Consola de Analíticas" style="width: 32px; height: 32px; background: none; border: none;">
           <span class="material-symbols-rounded" style="font-size: 22px; color: var(--text-secondary);">bar_chart</span>
+        </button>
+        <button id="btn-header-profile" class="btn btn-secondary btn-icon" title="Mi Cuenta" style="width: 32px; height: 32px; background: none; border: none;">
+          <span class="material-symbols-rounded" style="font-size: 22px; color: var(--text-secondary);">account_circle</span>
         </button>
         <div id="network-status" style="display: flex; align-items: center;"></div>
       </div>
@@ -141,6 +147,10 @@ function renderAppShell() {
 
   document.getElementById('btn-header-analytics').addEventListener('click', () => {
     navigateTo('analytics');
+  });
+
+  document.getElementById('btn-header-profile').addEventListener('click', () => {
+    navigateTo('profile');
   });
 
   updateNetworkUI();
