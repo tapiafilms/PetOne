@@ -1,4 +1,5 @@
 // Dashboard Component for "Mis Mascotas" overview, smart recompra, ticket scanning, health diaries, subscriptions and Phase 3 upgrades (Retail Media + AI)
+// Added: Reels/Stories (Instagram style), Daily Trivia (+10 points), Pet Photo Contest, and SOS Lost Pets bulletin.
 import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog } from '../utils/db.js';
 import { TIPS_AND_CARE, PRODUCTS } from '../data/mockData.js';
 import { navigateTo, showToast } from '../main.js';
@@ -22,12 +23,39 @@ export async function renderDashboard(container) {
     targetProductId: 'prod-8'
   };
 
+  // Mock Stories Data (Instagram Style Product Stories)
+  const stories = [
+    { id: 'story-1', title: 'Unboxing Kong', emoji: '📦', videoTitle: 'Kong Classic en Acción', label: 'Ver Juguetes', targetView: 'catalog', productType: 'Juguetes' },
+    { id: 'story-2', title: 'Spa de Toby', emoji: '🛁', videoTitle: 'Corte y Lavado Oster', label: 'Agendar Cita', targetView: 'services', productType: '' },
+    { id: 'story-3', title: 'Comida VIP', emoji: '🍖', videoTitle: 'Nutrición Royal Canin', label: 'Ver Alimento', targetView: 'catalog', productType: 'Alimentos' }
+  ];
+
+  // Mock Contest Contestants
+  let contestants = [
+    { id: 'cont-1', name: 'Coco', owner: '@goldencoco', votes: 142, emoji: '🦮', color: 'linear-gradient(135deg, #fef08a 0%, #ca8a04 100%)' },
+    { id: 'cont-2', name: 'Milo', owner: '@milothecat', votes: 98, emoji: '🐈', color: 'linear-gradient(135deg, #fed7aa 0%, #ea580c 100%)' }
+  ];
+
+  // Mock SOS Lost Pets
+  const lostPets = [
+    { id: 'sos-1', name: 'Kira (Siberiano)', location: 'Providencia, Calle Lota', date: 'Ayer', contact: '+56 9 1234 5678', emoji: '🐺' },
+    { id: 'sos-2', name: 'Tom (Mestizo)', location: 'Las Condes, Av. Colón', date: 'Hace 2 días', contact: '+56 9 8765 4321', emoji: '🐱' }
+  ];
+
+  // Trivia state (in-memory, status persistent in session for clean interaction)
+  if (!window.triviaState) {
+    window.triviaState = {
+      answered: false,
+      correct: false
+    };
+  }
+
   // Register Retail Media Impression
   try {
     await saveRetailMediaPerformance({
       id: currentAd.id,
       sponsor: currentAd.sponsor,
-      impressions: 1, // incremental simulation done in analysis
+      impressions: 1,
       clicks: 0
     });
   } catch(err) {
@@ -42,7 +70,83 @@ export async function renderDashboard(container) {
       return;
     }
 
-    // 1. Retail Media Banner (Sponsor)
+    // Add Custom CSS for Stories / Confetti Animations
+    if (!document.getElementById('dashboard-extra-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'dashboard-extra-styles';
+      styles.innerHTML = `
+        @keyframes storyProgress {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        @keyframes heartPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.3); }
+        }
+        .story-bubble {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          cursor: pointer;
+          flex-shrink: 0;
+        }
+        .story-avatar {
+          width: 58px;
+          height: 58px;
+          border-radius: 50%;
+          padding: 2px;
+          background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s ease;
+        }
+        .story-avatar:hover {
+          transform: scale(1.05);
+        }
+        .story-inner {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: var(--bg-secondary);
+          border: 2px solid var(--bg-primary);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+        }
+        .voted-heart {
+          color: #ef4444 !important;
+          animation: heartPulse 0.4s ease-out;
+        }
+      `;
+      document.head.appendChild(styles);
+    }
+
+    // 1. Instagram-Style Stories / Reels
+    const storiesContainer = document.createElement('div');
+    storiesContainer.className = 'scroll-x';
+    storiesContainer.style.gap = '16px';
+    storiesContainer.style.padding = '8px 4px 12px 4px';
+    storiesContainer.style.marginBottom = '1rem';
+    storiesContainer.innerHTML = stories.map(st => `
+      <div class="story-bubble" data-id="${st.id}">
+        <div class="story-avatar">
+          <div class="story-inner">${st.emoji}</div>
+        </div>
+        <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; text-align: center;">${st.title}</span>
+      </div>
+    `).join('');
+    container.appendChild(storiesContainer);
+
+    storiesContainer.querySelectorAll('.story-bubble').forEach(bubble => {
+      bubble.addEventListener('click', () => {
+        openStoryModal(bubble.dataset.id);
+      });
+    });
+
+    // 2. Retail Media Banner (Sponsor)
     const adBanner = document.createElement('div');
     adBanner.className = 'glass-card';
     adBanner.style.border = '1px solid rgba(79, 70, 229, 0.3)';
@@ -64,7 +168,6 @@ export async function renderDashboard(container) {
     container.appendChild(adBanner);
 
     adBanner.addEventListener('click', async () => {
-      // Register Ad Click
       try {
         await saveRetailMediaPerformance({
           id: currentAd.id,
@@ -85,7 +188,7 @@ export async function renderDashboard(container) {
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
           <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800;">Hola, ${profile.name}!</h2>
-          <p style="color: var(--text-secondary); font-size: 0.85rem;">Tu hogar acumula <strong>${profile.points}</strong> puntos PetOne</p>
+          <p style="color: var(--text-secondary); font-size: 0.85rem;">Tu hogar acumula <strong style="color: var(--secondary);">${profile.points}</strong> puntos PetOne</p>
         </div>
         <button id="btn-reset-profile" class="btn btn-secondary btn-icon" title="Reiniciar Perfil" style="width: 36px; height: 36px; border-radius: 8px;">
           <span class="material-symbols-rounded" style="font-size: 18px; color: var(--text-muted);">refresh</span>
@@ -214,6 +317,58 @@ export async function renderDashboard(container) {
     `;
     container.appendChild(petCard);
 
+    // 3. Trivia Diaria de Salud Card
+    const triviaCard = document.createElement('div');
+    triviaCard.className = 'glass-card';
+    triviaCard.style.border = '1px solid rgba(16, 185, 129, 0.2)';
+    triviaCard.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(17, 24, 39, 0.8) 100%)';
+    triviaCard.style.marginBottom = '1.25rem';
+    
+    if (window.triviaState.answered) {
+      triviaCard.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; padding: 4px;">
+          <span class="material-symbols-rounded" style="color: var(--secondary); font-size: 32px;">workspace_premium</span>
+          <div>
+            <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">¡Trivia Diaria Completada!</h4>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+              ${window.triviaState.correct ? '🎉 Correcto: El chocolate tiene teobromina, muy dañina para mascotas. Ganaste <strong>+10 puntos</strong>!' : '¡Buen intento! El chocolate es dañino. Regresa mañana por otra trivia.'}
+            </p>
+          </div>
+        </div>
+      `;
+    } else {
+      triviaCard.innerHTML = `
+        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+          <span class="material-symbols-rounded" style="font-size: 18px;">quiz</span> Trivia Diaria: Gana +10 Puntos
+        </h4>
+        <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 10px;">¿Cuál de estos alimentos cotidianos es altamente tóxico para los perros?</p>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <button class="btn btn-secondary btn-trivia-opt" data-correct="false" style="text-align: left; padding: 8px 12px; font-size: 0.75rem;">A) Plátanos maduros</button>
+          <button class="btn btn-secondary btn-trivia-opt" data-correct="true" style="text-align: left; padding: 8px 12px; font-size: 0.75rem;">B) Chocolate (Teobromina)</button>
+          <button class="btn btn-secondary btn-trivia-opt" data-correct="false" style="text-align: left; padding: 8px 12px; font-size: 0.75rem;">C) Arroz cocido sin sal</button>
+        </div>
+      `;
+    }
+    container.appendChild(triviaCard);
+
+    // Attach Trivia Option listeners
+    triviaCard.querySelectorAll('.btn-trivia-opt').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const correct = btn.dataset.correct === 'true';
+        window.triviaState.answered = true;
+        window.triviaState.correct = correct;
+
+        if (correct) {
+          profile.points = (profile.points || 0) + 10;
+          await saveProfile(profile);
+          showToast('¡Correcto! +10 puntos acumulados.');
+        } else {
+          showToast('Incorrecto. El chocolate es tóxico.');
+        }
+        render();
+      });
+    });
+
     // Active Subscriptions Card
     if (subscriptions.length > 0) {
       const subsCard = document.createElement('div');
@@ -270,6 +425,93 @@ export async function renderDashboard(container) {
       </div>
     `;
     container.appendChild(scanGoCard);
+
+    // 4. Concurso: Mascota de la Semana (Photo Contest)
+    const contestSection = document.createElement('div');
+    contestSection.style.marginBottom = '1.5rem';
+    contestSection.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h2><span class="material-symbols-rounded" style="color: var(--accent);">star</span> Mascota de la Semana</h2>
+        <button id="btn-contest-upload" class="btn btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; width: auto; border-radius: 6px;">
+          <span class="material-symbols-rounded" style="font-size: 14px;">photo_camera</span> Subir Foto
+        </button>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        ${contestants.map(c => `
+          <div class="glass-card" style="padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative;">
+            <div style="width: 100%; height: 100px; border-radius: 8px; background: ${c.color}; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin-bottom: 8px;">
+              ${c.emoji}
+            </div>
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; font-size: 0.75rem;">
+              <div>
+                <strong>${c.name}</strong>
+                <div style="color: var(--text-muted); font-size: 0.65rem;">${c.owner}</div>
+              </div>
+              <button class="btn-vote-heart" data-id="${c.id}" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 2px; color: var(--text-secondary);">
+                <span class="material-symbols-rounded" style="font-size: 16px;">favorite</span>
+                <span class="vote-count">${c.votes}</span>
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(contestSection);
+
+    // Vote handler
+    contestSection.querySelectorAll('.btn-vote-heart').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cId = btn.dataset.id;
+        const icon = btn.querySelector('.material-symbols-rounded');
+        const countSpan = btn.querySelector('.vote-count');
+        const isVoted = icon.classList.contains('voted-heart');
+        
+        const c = contestants.find(x => x.id === cId);
+        if (!c) return;
+
+        if (isVoted) {
+          icon.classList.remove('voted-heart');
+          c.votes--;
+        } else {
+          icon.classList.add('voted-heart');
+          c.votes++;
+          showToast(`¡Voto registrado para ${c.name}!`);
+        }
+        countSpan.textContent = c.votes;
+      });
+    });
+
+    document.getElementById('btn-contest-upload').addEventListener('click', () => openPhotoUploadModal());
+
+    // 5. SOS Mascotas Perdidas Bulletin
+    const sosSection = document.createElement('div');
+    sosSection.style.marginBottom = '1.5rem';
+    sosSection.innerHTML = `
+      <h2><span class="material-symbols-rounded" style="color: var(--danger);">warning</span> SOS Mascotas Perdidas Cerca</h2>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+        ${lostPets.map(p => `
+          <div class="card" style="margin-bottom: 0; padding: 10px 12px; display: flex; gap: 10px; align-items: center; background: linear-gradient(135deg, rgba(239,68,68,0.03) 0%, rgba(17,24,39,0.8) 100%);">
+            <span style="font-size: 1.75rem;">${p.emoji}</span>
+            <div style="flex: 1;">
+              <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary);">${p.name}</h4>
+              <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 1px;">📍 ${p.location} • Hace: ${p.date}</p>
+            </div>
+            <button class="btn btn-secondary btn-sos-alert" data-name="${p.name}" data-contact="${p.contact}" style="width: auto; padding: 5px 10px; font-size: 0.65rem; border-color: rgba(239,68,68,0.2); color: var(--danger);">
+              Ayudar
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(sosSection);
+
+    sosSection.querySelectorAll('.btn-sos-alert').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.name;
+        const contact = btn.dataset.contact;
+        openSosModal(name, contact);
+      });
+    });
 
     // Care Tips and Preventative Care Cards
     const careSection = document.createElement('div');
@@ -429,6 +671,89 @@ export async function renderDashboard(container) {
         navigateTo('dashboard');
       });
     }, 50);
+  }
+
+  // INSTAGRAM STORY MODAL
+  function openStoryModal(storyId) {
+    const st = stories.find(s => s.id === storyId);
+    if (!st) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.zIndex = '3000';
+    document.body.appendChild(overlay);
+
+    overlay.innerHTML = `
+      <div style="width: 100%; max-width: 480px; height: 100%; background: black; display: flex; flex-direction: column; position: relative; color: white;">
+        
+        <!-- Progress Bar Indicator at Top -->
+        <div style="position: absolute; top: 12px; left: 12px; right: 12px; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; z-index: 10;">
+          <div style="height: 100%; width: 0%; background: white; border-radius: 2px; animation: storyProgress 5s linear forwards;" id="story-progress-bar"></div>
+        </div>
+
+        <!-- Header Info -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 24px 16px 12px 16px; z-index: 5;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+              🐾
+            </div>
+            <div>
+              <span style="font-weight: 700; font-size: 0.85rem;">PetOne Oficial</span>
+              <span style="font-size: 0.65rem; color: #94a3b8; display: block;">Historia Patrocinada</span>
+            </div>
+          </div>
+          <button id="btn-close-story" class="btn btn-icon" style="background: none; border: none; color: white; width: 32px; height: 32px;">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <!-- Video Simulation Area -->
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: linear-gradient(180deg, #111827 0%, #1e1b4b 100%);">
+          
+          <div style="font-size: 5rem; animation: heartPulse 1.5s infinite ease-in-out;">
+            ${st.emoji}
+          </div>
+
+          <h3 style="margin-top: 1.5rem; text-align: center; width: 80%; font-size: 1.4rem; font-weight: 800; text-shadow: 0 4px 6px rgba(0,0,0,0.5);">
+            ${st.videoTitle}
+          </h3>
+
+          <p style="color: #cbd5e1; font-size: 0.85rem; text-align: center; width: 75%; margin-top: 8px;">
+            Descubre las novedades en nuestra tienda y cuida a tu mascota hoy.
+          </p>
+
+        </div>
+
+        <!-- Call to Action Banner Swipe-Up style -->
+        <div style="padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; background: rgba(17, 24, 39, 0.95); border-top: 1px solid rgba(255,255,255,0.1); z-index: 5;">
+          <span class="material-symbols-rounded" style="animation: bounce 1.5s infinite; color: var(--secondary); font-size: 20px;">keyboard_double_arrow_up</span>
+          <button id="btn-story-cta" class="btn btn-primary" style="background: var(--secondary); font-size: 0.9rem; padding: 12px; width: 100%;">
+            ${st.label}
+          </button>
+        </div>
+
+      </div>
+    `;
+
+    // Auto-close after 5 seconds
+    const autoCloseTimer = setTimeout(() => {
+      overlay.remove();
+    }, 5000);
+
+    document.getElementById('btn-close-story').addEventListener('click', () => {
+      clearTimeout(autoCloseTimer);
+      overlay.remove();
+    });
+
+    document.getElementById('btn-story-cta').addEventListener('click', () => {
+      clearTimeout(autoCloseTimer);
+      overlay.remove();
+      if (st.targetView === 'catalog') {
+        navigateTo('catalog', st.productType);
+      } else {
+        navigateTo(st.targetView);
+      }
+    });
   }
 
   // MODAL FOR SCANNING TICKET
@@ -696,6 +1021,97 @@ export async function renderDashboard(container) {
       showToast('Comentario guardado. Agradecemos tu feedback.');
       overlay.remove();
       navigateTo('dashboard');
+    });
+  }
+
+  // PHOTO CONTEST UPLOAD MODAL
+  function openPhotoUploadModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    document.body.appendChild(overlay);
+
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <h2 style="margin: 0;"><span class="material-symbols-rounded">photo_camera</span> Subir Foto al Concurso</h2>
+          <button id="btn-close-upload" class="btn btn-secondary btn-icon" style="width: 32px; height: 32px; border-radius: 50%;">
+            <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
+          </button>
+        </div>
+
+        <div style="background-color: black; border-radius: 12px; height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; margin-bottom: 1.25rem; border: 2px dashed var(--accent);">
+          <span class="material-symbols-rounded" style="font-size: 44px; color: var(--accent);">add_photo_alternate</span>
+          <span style="color: #cbd5e1; font-size: 0.8rem; margin-top: 8px;">Selecciona o captura la foto de tu mascota</span>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Nombre de tu Mascota</label>
+          <input type="text" id="contest-pet-name" class="input-field" placeholder="Ej. Toby" value="${activePet.name}">
+        </div>
+
+        <div class="input-group" style="margin-bottom: 1.5rem;">
+          <label class="input-label">Tu Usuario de Instagram / Red Social</label>
+          <input type="text" id="contest-owner-handle" class="input-field" placeholder="Ej. @toby_the_dog" value="@tutor_${profile.name.toLowerCase()}">
+        </div>
+
+        <button id="btn-submit-photo" class="btn btn-primary" style="background-color: var(--accent); box-shadow: none;">
+          <span class="material-symbols-rounded" style="font-size: 18px;">upload</span>
+          Subir y Participar
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btn-close-upload').addEventListener('click', () => overlay.remove());
+
+    document.getElementById('btn-submit-photo').addEventListener('click', () => {
+      const name = document.getElementById('contest-pet-name').value.trim();
+      const handle = document.getElementById('contest-owner-handle').value.trim();
+
+      if (!name || !handle) {
+        alert('Por favor completa todos los campos.');
+        return;
+      }
+
+      showToast(`¡Foto de ${name} subida con éxito! Ya estás participando.`);
+      overlay.remove();
+    });
+  }
+
+  // SOS ALERTS DETAILS MODAL
+  function openSosModal(petName, contact) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    document.body.appendChild(overlay);
+
+    overlay.innerHTML = `
+      <div class="modal-content" style="text-align: center;">
+        <span class="material-symbols-rounded" style="font-size: 56px; color: var(--danger); animation: heartPulse 1.5s infinite;">warning</span>
+        <h3 style="margin-top: 10px;">¿Has visto a ${petName}?</h3>
+        <p style="font-size: 0.8rem; margin-top: 8px; color: var(--text-secondary); line-height: 1.4;">
+          Cualquier dato o avistamiento ayuda enormemente al tutor. Si tienes información o lo tienes a resguardo, por favor ponte en contacto:
+        </p>
+
+        <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin: 16px 0; border: 1px solid var(--border-color); font-family: monospace; font-size: 1.1rem; color: white; font-weight: bold;">
+          ${contact}
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-direction: column;">
+          <button id="btn-sos-whatsapp" class="btn btn-primary" style="background-color: #25d366; border: none; box-shadow: none;">
+            <span class="material-symbols-rounded">chat</span>
+            Enviar WhatsApp
+          </button>
+          
+          <button id="btn-sos-close" class="btn btn-secondary">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-sos-close').addEventListener('click', () => overlay.remove());
+    document.getElementById('btn-sos-whatsapp').addEventListener('click', () => {
+      window.open(`https://wa.me/${contact.replace(/\s+/g, '')}?text=Hola,%20tengo%20información%20sobre%20la%20mascota%20perdida%20${petName}`, '_blank');
+      overlay.remove();
     });
   }
 
