@@ -48,14 +48,20 @@ export const TENANTS = {
 };
 
 export function getTenantConfig() {
+  // 1. Pathname detection (e.g. /superzoo or /petcity)
+  const path = window.location.pathname.replace(/^\/|\/$/g, '').toLowerCase();
+  if (path && TENANTS[path]) {
+    return TENANTS[path];
+  }
+
+  // 2. Query param detection (e.g. ?tenant=superzoo)
   const params = new URLSearchParams(window.location.search);
   const tenantParam = params.get('tenant');
-  
   if (tenantParam && TENANTS[tenantParam.toLowerCase()]) {
     return TENANTS[tenantParam.toLowerCase()];
   }
   
-  // Hostname detection fallback (SaaS production style)
+  // 3. Hostname detection fallback (SaaS production style)
   const host = window.location.hostname;
   if (host.includes('superzoo')) {
     return TENANTS.superzoo;
@@ -91,6 +97,15 @@ export function applyTenantStyles(config) {
   if (headerLogo) {
     const existingTextLogo = document.getElementById('header-text-logo');
     if (existingTextLogo) existingTextLogo.remove();
+    
+    const poweredBadge = document.querySelector('.powered-by-insignia');
+    if (poweredBadge) {
+      if (config.id !== 'default') {
+        poweredBadge.style.display = 'inline-flex';
+      } else {
+        poweredBadge.style.display = 'none';
+      }
+    }
     
     if (config.id === 'superzoo') {
       headerLogo.style.display = 'none';

@@ -15,6 +15,7 @@ import { renderFotoJuntos } from './components/FotoJuntos.js';
 import { renderCart } from './components/Cart.js';
 import { getTenantConfig, applyTenantStyles } from './config/tenantConfig.js';
 import { renderAdminPortal } from './components/AdminPortal.js';
+import { renderLanding } from './components/Landing.js';
 
 // Global State
 window.appState = {
@@ -93,6 +94,8 @@ export async function navigateTo(view, extraData = null) {
     await renderCart(pageContainer);
   } else if (view === 'admin-portal') {
     await renderAdminPortal(pageContainer);
+  } else if (view === 'landing') {
+    await renderLanding(pageContainer);
   }
 }
 
@@ -104,6 +107,9 @@ function renderAppShell() {
     <header class="header-bar" style="border-bottom: 1px solid var(--border-color); background: rgba(17, 24, 39, 0.4); padding: 8px 16px !important; margin-bottom: 6px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <img src="/logo-petone.png" alt="PetOne Logo" style="height: 24px; width: auto; object-fit: contain; filter: drop-shadow(0 0 4px var(--primary-glow));">
+        <span class="powered-by-insignia" style="font-size: 0.58rem; color: var(--text-muted); opacity: 0.85; font-weight: 500; letter-spacing: 0.2px; background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); display: none; align-items: center; gap: 2px;">
+          powered by <strong style="color: #a855f7;">PetOne</strong>
+        </span>
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
         <button id="btn-header-cart" class="btn btn-secondary btn-icon" title="Cesta de Retiro" style="width: 32px; height: 32px; background: none; border: none; position: relative;">
@@ -268,15 +274,29 @@ window.addEventListener('offline', () => {
 
 // App Initialization
 async function init() {
+  const tenant = getTenantConfig();
   // Apply SaaS Whitelabel tenant styles on initial app launch
-  applyTenantStyles(getTenantConfig());
+  applyTenantStyles(tenant);
   
+  // If default tenant (corporate root), render Landing page instead of client PWA
+  if (tenant.id === 'default') {
+    const app = document.getElementById('app');
+    app.innerHTML = '';
+    
+    const pageContainer = document.createElement('div');
+    pageContainer.className = 'page';
+    pageContainer.style.paddingTop = '1rem';
+    app.appendChild(pageContainer);
+    
+    renderLanding(pageContainer);
+    return;
+  }
+
   const profile = await getProfile();
   
   if (!profile) {
     const app = document.getElementById('app');
     app.innerHTML = '';
-
     
     const pageContainer = document.createElement('div');
     pageContainer.className = 'page';
