@@ -19,8 +19,8 @@ export function renderOnboarding(container) {
     header.style.textAlign = 'center';
     header.style.marginBottom = '2rem';
     header.innerHTML = `
-      <span class="material-symbols-rounded" style="font-size: 54px; color: var(--primary); margin-bottom: 0.5rem; display: inline-block;">pets</span>
-      <h1 style="margin: 0; font-size: 1.8rem;">Bienvenido a PetOne</h1>
+      <img src="/logo-petone.png" alt="PetOne Logo" style="height: 64px; width: auto; object-fit: contain; margin-bottom: 0.5rem; filter: drop-shadow(0 0 8px var(--primary-glow));">
+      <h1 style="margin: 0; font-size: 1.8rem; font-weight: 800;">Bienvenido a PetOne</h1>
       <p style="margin-top: 4px;">Configura tu hogar para recibir recomendaciones personalizadas</p>
     `;
     container.appendChild(header);

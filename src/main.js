@@ -95,8 +95,8 @@ function renderAppShell() {
     <!-- Top Header Bar -->
     <header class="header-bar" style="border-bottom: 1px solid var(--border-color); background: rgba(17, 24, 39, 0.4); padding-bottom: 12px; margin-bottom: 8px;">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="material-symbols-rounded" style="color: var(--primary); font-size: 32px; font-weight: bold;">pets</span>
-        <h1 style="margin: 0; font-size: 1.5rem; letter-spacing: -0.5px;">PetOne</h1>
+        <img src="/logo-petone.png" alt="PetOne Logo" style="height: 28px; width: auto; object-fit: contain; filter: drop-shadow(0 0 4px var(--primary-glow));">
+        <h1 style="margin: 0; font-size: 1.5rem; letter-spacing: -0.5px; font-weight: 800; color: white;">PetOne</h1>
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
         <button id="btn-header-community" class="btn btn-secondary btn-icon" title="Guías de Cuidado" style="width: 32px; height: 32px; background: none; border: none;">
