@@ -2,7 +2,7 @@
 import { supabase } from './supabaseClient.js';
 
 const DB_NAME = 'petone_db';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 let dbPromise = null;
 
@@ -59,6 +59,13 @@ function getDB() {
       if (oldVersion < 4) {
         if (!db.objectStoreNames.contains('aiPhotos')) {
           db.createObjectStore('aiPhotos', { keyPath: 'id' });
+        }
+      }
+
+      // Version 5 stores
+      if (oldVersion < 5) {
+        if (!db.objectStoreNames.contains('cart')) {
+          db.createObjectStore('cart', { keyPath: 'id' });
         }
       }
     };
@@ -486,3 +493,94 @@ export async function getCommunityPhotos() {
     return [];
   }
 }
+
+// CART OPERATIONS
+export async function getCartItems() {
+  const db = await getDB();
+  return new Promise((resolve) => {
+    const transaction = db.transaction('cart', 'readonly');
+    const store = transaction.objectStore('cart');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => resolve([]);
+  });
+}
+
+export async function addToCart(product) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('cart', 'readwrite');
+    const store = transaction.objectStore('cart');
+    
+    // Check if item already exists
+    const getRequest = store.get(product.id);
+    getRequest.onsuccess = () => {
+      let item = getRequest.result;
+      if (item) {
+        item.qty = (item.qty || 1) + 1;
+      } else {
+        item = {
+          id: product.id,
+          brand: product.brand,
+          name: product.name,
+          price: product.price,
+          size: product.size || '',
+          imageBg: product.imageBg || '#4f46e5',
+          qty: 1
+        };
+      }
+      const putRequest = store.put(item);
+      putRequest.onsuccess = () => resolve(item);
+      putRequest.onerror = () => reject(putRequest.error);
+    };
+    getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+export async function updateCartItemQty(productId, qty) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    if (qty <= 0) {
+      removeFromCart(productId).then(resolve).catch(reject);
+      return;
+    }
+    const transaction = db.transaction('cart', 'readwrite');
+    const store = transaction.objectStore('cart');
+    const getRequest = store.get(productId);
+    getRequest.onsuccess = () => {
+      const item = getRequest.result;
+      if (item) {
+        item.qty = qty;
+        const putRequest = store.put(item);
+        putRequest.onsuccess = () => resolve();
+        putRequest.onerror = () => reject(putRequest.error);
+      } else {
+        resolve();
+      }
+    };
+    getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+export async function removeFromCart(productId) {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('cart', 'readwrite');
+    const store = transaction.objectStore('cart');
+    const request = store.delete(productId);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function clearCart() {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction('cart', 'readwrite');
+    const store = transaction.objectStore('cart');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+

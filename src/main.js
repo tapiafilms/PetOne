@@ -1,5 +1,5 @@
 import './css/index.css';
-import { getProfile, getOfflineTickets, clearOfflineTickets, addPurchase } from './utils/db.js';
+import { getProfile, getOfflineTickets, clearOfflineTickets, addPurchase, getCartItems } from './utils/db.js';
 import { renderOnboarding } from './components/Onboarding.js';
 import { renderDashboard } from './components/Dashboard.js';
 import { renderCatalog } from './components/Catalog.js';
@@ -12,6 +12,8 @@ import { renderAnalytics } from './components/Analytics.js';
 import { renderCommunity } from './components/Community.js';
 import { renderProfile } from './components/Profile.js';
 import { renderFotoJuntos } from './components/FotoJuntos.js';
+import { renderCart } from './components/Cart.js';
+
 
 // Global State
 window.appState = {
@@ -85,6 +87,8 @@ export async function navigateTo(view, extraData = null) {
     await renderProfile(pageContainer);
   } else if (view === 'juntos') {
     await renderFotoJuntos(pageContainer);
+  } else if (view === 'cart') {
+    await renderCart(pageContainer);
   }
 }
 
@@ -98,6 +102,10 @@ function renderAppShell() {
         <img src="/logo-petone.png" alt="PetOne Logo" style="height: 24px; width: auto; object-fit: contain; filter: drop-shadow(0 0 4px var(--primary-glow));">
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="btn-header-cart" class="btn btn-secondary btn-icon" title="Cesta de Retiro" style="width: 32px; height: 32px; background: none; border: none; position: relative;">
+          <span class="material-symbols-rounded" style="font-size: 22px; color: var(--text-secondary);">shopping_basket</span>
+          <span id="cart-badge" style="position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; background-color: var(--danger); color: white; font-size: 10px; font-weight: bold; display: none; align-items: center; justify-content: center; border: 1.5px solid #0a0f1d; line-height: 1;">0</span>
+        </button>
         <button id="btn-header-community" class="btn btn-secondary btn-icon" title="Guías de Cuidado" style="width: 32px; height: 32px; background: none; border: none;">
           <span class="material-symbols-rounded" style="font-size: 22px; color: var(--text-secondary);">menu_book</span>
         </button>
@@ -143,6 +151,10 @@ function renderAppShell() {
   });
 
   // Attach header action listeners
+  document.getElementById('btn-header-cart').addEventListener('click', () => {
+    navigateTo('cart');
+  });
+
   document.getElementById('btn-header-community').addEventListener('click', () => {
     navigateTo('community');
   });
@@ -154,6 +166,23 @@ function renderAppShell() {
   document.getElementById('btn-header-profile').addEventListener('click', () => {
     navigateTo('profile');
   });
+
+  // Cart badge update function
+  window.updateCartBadgeCount = async function() {
+    const badge = document.getElementById('cart-badge');
+    if (!badge) return;
+    const items = await getCartItems();
+    const count = items.reduce((sum, item) => sum + (item.qty || 0), 0);
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  };
+
+  // Init cart badge count
+  window.updateCartBadgeCount();
 
   updateNetworkUI();
 }

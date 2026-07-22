@@ -1,8 +1,9 @@
 // Dashboard Component for "Mis Mascotas" overview, smart recompra, ticket scanning, health diaries, subscriptions and Phase 3 upgrades (Retail Media + AI)
 // Added: Reels/Stories (Instagram style), Daily Trivia (+10 points), community AI portraits feed (interactive swiping card stack), and SOS lost pets bulletin.
-import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog, getCommunityPhotos, getAiPhotos } from '../utils/db.js';
+import { getProfile, getPets, getPurchases, addPurchase, addOfflineTicket, saveProfile, getSubscriptions, saveRetailMediaPerformance, addScanLog, getCommunityPhotos, getAiPhotos, addToCart } from '../utils/db.js';
 import { TIPS_AND_CARE, PRODUCTS } from '../data/mockData.js';
 import { navigateTo, showToast } from '../main.js';
+
 
 export async function renderDashboard(container) {
   const profile = await getProfile();
@@ -857,23 +858,24 @@ export async function renderDashboard(container) {
 
     setTimeout(() => {
       document.getElementById('btn-quick-reorder')?.addEventListener('click', async () => {
-        const reorderItem = {
-          id: `purch-${Date.now()}`,
-          date: new Date().toISOString().split('T')[0],
-          total: lastPurchase.total,
-          items: lastPurchase.items.map(i => ({ ...i })),
-          type: 'E-Commerce (Recompra Rápida)'
-        };
-        
-        await addPurchase(reorderItem);
-        
-        profile.points = (profile.points || 0) + Math.round(lastPurchase.total * 0.05);
-        await saveProfile(profile);
-        
-        showToast('¡Compra recurrente procesada con éxito!');
-        navigateTo('dashboard');
+        // Add all products of last purchase to the cart
+        for (const item of lastPurchase.items) {
+          const prod = PRODUCTS.find(p => p.name === item.name) || {
+            id: `prod-${Date.now()}`,
+            brand: item.brand,
+            name: item.name,
+            price: item.price,
+            size: '',
+            imageBg: '#4f46e5'
+          };
+          await addToCart(prod);
+        }
+        window.updateCartBadgeCount();
+        showToast('¡Productos de tu recompra agregados a tu cesta!');
+        navigateTo('cart');
       });
     }, 50);
+
   }
 
   // INSTAGRAM STORY MODAL
@@ -1138,8 +1140,8 @@ export async function renderDashboard(container) {
 
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 1.25rem;">
           <button id="btn-scango-pay" class="btn btn-primary" style="background-color: var(--secondary); box-shadow: none;">
-            <span class="material-symbols-rounded" style="font-size: 18px;">wallet</span>
-            Pagar al Instante ($${prod.price.toLocaleString('es-CL')})
+            <span class="material-symbols-rounded" style="font-size: 18px;">shopping_basket</span>
+            Agregar a la Cesta ($${prod.price.toLocaleString('es-CL')})
           </button>
           
           <button id="btn-scango-abandon" class="btn btn-secondary" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2);">
@@ -1152,13 +1154,7 @@ export async function renderDashboard(container) {
     document.getElementById('btn-close-scango-detail').addEventListener('click', () => overlay.remove());
 
     document.getElementById('btn-scango-pay').addEventListener('click', async () => {
-      await addPurchase({
-        id: `scango-${Date.now()}`,
-        date: new Date().toISOString().split('T')[0],
-        total: prod.price,
-        items: [{ brand: prod.brand, name: prod.name, price: prod.price }],
-        type: 'Scan & Go (Sucursal)'
-      });
+      await addToCart(prod);
 
       await addScanLog({
         id: `log-${Date.now()}`,
@@ -1170,12 +1166,10 @@ export async function renderDashboard(container) {
         abandonReason: ''
       });
 
-      profile.points = (profile.points || 0) + Math.round(prod.price * 0.05);
-      await saveProfile(profile);
-
-      showToast(`¡PAGO EXITOSO! Compra registrada en tienda física.`);
+      window.updateCartBadgeCount();
+      showToast(`¡Añadiste ${prod.name} a tu cesta!`);
       overlay.remove();
-      navigateTo('dashboard');
+      navigateTo('cart');
     });
 
     document.getElementById('btn-scango-abandon').addEventListener('click', () => {

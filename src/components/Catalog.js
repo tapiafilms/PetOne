@@ -1,6 +1,6 @@
 // Catalog Component for multi-category and multi-brand exploration with comparison, private label switcher, subscriptions and cross-selling (Phase 2 Upgrade)
 import { CATEGORIES, PRODUCTS, CROSS_SELL_RULES } from '../data/mockData.js';
-import { getProfile, saveProfile, addPurchase, addSubscription, getPurchases } from '../utils/db.js';
+import { getProfile, saveProfile, addPurchase, addSubscription, getPurchases, addToCart } from '../utils/db.js';
 import { showToast, navigateTo } from '../main.js';
 
 export async function renderCatalog(container) {
@@ -90,14 +90,18 @@ export async function renderCatalog(container) {
 
       setTimeout(() => {
         document.getElementById('btn-buy-pl')?.addEventListener('click', async () => {
-          await simulatePurchase({
+          const prod = {
             id: 'pl-1',
             brand: 'PetOne Essentials',
             name: 'Premium Adult Complete',
             price: 19990
-          });
+          };
+          await addToCart(prod);
+          showToast(`¡Añadiste ${prod.name} a tu cesta!`);
+          window.updateCartBadgeCount();
         });
       }, 50);
+
     }
 
     // Filter products
@@ -157,7 +161,7 @@ export async function renderCatalog(container) {
                     </button>
                   ` : ''}
                   <button class="btn btn-primary btn-buy" data-id="${p.id}" style="width: auto; padding: 6px 12px; font-size: 0.75rem;">
-                    Comprar
+                    Agregar
                   </button>
                 </div>
               </div>
@@ -184,10 +188,12 @@ export async function renderCatalog(container) {
     productGrid.querySelectorAll('.btn-buy').forEach(btn => {
       btn.addEventListener('click', async () => {
         const prod = PRODUCTS.find(p => p.id === btn.dataset.id);
-        await simulatePurchase(prod);
-        render(); // Re-render to update cross-sell widget based on new purchase!
+        await addToCart(prod);
+        showToast(`¡Añadiste ${prod.name} a tu cesta!`);
+        window.updateCartBadgeCount();
       });
     });
+
 
     productGrid.querySelectorAll('.btn-compare').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -268,10 +274,12 @@ export async function renderCatalog(container) {
     widget.querySelectorAll('.btn-buy-cross').forEach(btn => {
       btn.addEventListener('click', async () => {
         const prod = PRODUCTS.find(p => p.id === btn.dataset.id);
-        await simulatePurchase(prod);
-        render();
+        await addToCart(prod);
+        showToast(`¡Añadiste ${prod.name} a tu cesta!`);
+        window.updateCartBadgeCount();
       });
     });
+
   }
 
   // Handle a purchase simulation
