@@ -17,8 +17,10 @@ export async function renderAdminPortal(container) {
     // Main Portal Layout
     const portal = document.createElement('div');
     portal.className = 'glass-card';
-    portal.style.padding = '1.5rem';
-    portal.style.marginTop = '0.5rem';
+    portal.style.padding = '2rem 1.5rem';
+    portal.style.maxWidth = '1100px';
+    portal.style.margin = '1.5rem auto 3rem auto';
+    portal.style.width = '100%';
     portal.style.border = '1px solid var(--primary-glow)';
     portal.style.background = 'linear-gradient(180deg, rgba(10, 15, 29, 0.9) 0%, rgba(17, 24, 39, 0.95) 100%)';
     portal.innerHTML = `

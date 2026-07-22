@@ -58,18 +58,31 @@ body {
 /* Base mobile container wrapper to simulate app on desktop */
 #app {
   width: 100%;
-  max-width: 480px; /* Standard phone container width */
   min-height: 100vh;
   background-color: var(--bg-primary);
   position: relative;
   display: flex;
   flex-direction: column;
+}
+
+#app.mobile-app-layout {
+  max-width: 480px; /* Standard phone container width */
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
   border-left: 1px solid var(--border-color);
   border-right: 1px solid var(--border-color);
   padding-bottom: calc(70px + var(--safe-area-bottom));
   padding-top: var(--safe-area-top);
 }
+
+#app.desktop-layout {
+  max-width: none;
+  box-shadow: none;
+  border-left: none;
+  border-right: none;
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
 
 /* Page Transitions */
 .page {

@@ -49,7 +49,34 @@ export async function navigateTo(view, extraData = null) {
   if (!appContainer) return;
   
   window.appState.currentView = view;
+
+  // 1. Handle wide desktop views (landing and admin-portal)
+  if (view === 'landing' || view === 'admin-portal') {
+    appContainer.classList.remove('mobile-app-layout');
+    appContainer.classList.add('desktop-layout');
+    
+    appContainer.innerHTML = '';
+    const pageContainer = document.createElement('div');
+    pageContainer.className = 'page';
+    appContainer.appendChild(pageContainer);
+    
+    if (view === 'landing') {
+      await renderLanding(pageContainer);
+    } else {
+      await renderAdminPortal(pageContainer);
+    }
+    return;
+  }
+
+  // 2. Handle client PWA mobile simulation views
+  appContainer.classList.remove('desktop-layout');
+  appContainer.classList.add('mobile-app-layout');
   
+  // Make sure app shell is loaded if we came from landing/admin portal
+  if (!document.getElementById('view-body')) {
+    renderAppShell();
+  }
+
   // Highlight active bottom nav item (only for main shell views)
   document.querySelectorAll('.nav-item').forEach(el => {
     if (el.dataset.view === view) {
@@ -92,10 +119,6 @@ export async function navigateTo(view, extraData = null) {
     await renderFotoJuntos(pageContainer);
   } else if (view === 'cart') {
     await renderCart(pageContainer);
-  } else if (view === 'admin-portal') {
-    await renderAdminPortal(pageContainer);
-  } else if (view === 'landing') {
-    await renderLanding(pageContainer);
   }
 }
 
@@ -281,6 +304,8 @@ async function init() {
   // If default tenant (corporate root), render Landing page instead of client PWA
   if (tenant.id === 'default') {
     const app = document.getElementById('app');
+    app.classList.remove('mobile-app-layout');
+    app.classList.add('desktop-layout');
     app.innerHTML = '';
     
     const pageContainer = document.createElement('div');
@@ -292,10 +317,13 @@ async function init() {
     return;
   }
 
+  const app = document.getElementById('app');
+  app.classList.remove('desktop-layout');
+  app.classList.add('mobile-app-layout');
+
   const profile = await getProfile();
   
   if (!profile) {
-    const app = document.getElementById('app');
     app.innerHTML = '';
     
     const pageContainer = document.createElement('div');
