@@ -139,7 +139,7 @@ export function renderLanding(container) {
     <!-- Top B2B Navigation -->
     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <img src="/logo-petone.png" alt="PetOne" style="height: 28px; width: auto; filter: drop-shadow(0 0 10px rgba(79, 70, 229, 0.4));">
+        <img src="/logo-petone.png" alt="PetOne" style="height: 70px; width: auto; filter: drop-shadow(0 0 10px rgba(79, 70, 229, 0.4));">
         <span style="font-size: 1.15rem; font-weight: 900; letter-spacing: -0.5px; color: white;">PetOne <span style="font-weight: 300; color: #a855f7;">SaaS</span></span>
       </div>
       <button id="btn-top-admin" class="btn btn-secondary" style="width: auto; padding: 6px 14px; font-size: 0.75rem;">
