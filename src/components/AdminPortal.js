@@ -53,7 +53,10 @@ export async function renderAdminPortal(container) {
     `;
     container.appendChild(portal);
 
-    document.getElementById('btn-admin-exit').addEventListener('click', () => navigateTo('profile'));
+    document.getElementById('btn-admin-exit').addEventListener('click', () => {
+      history.pushState({}, '', '/');
+      navigateTo('landing');
+    });
 
     document.getElementById('tab-overview').addEventListener('click', () => {
       activeAdminTab = 'overview';

@@ -235,27 +235,6 @@ export async function renderProfile(container) {
       }
     });
 
-    // Append simulated external corporate link for administrators in Whitelabel mode
-    if (tenant.id !== 'default') {
-      const adminLink = document.createElement('div');
-      adminLink.style.textAlign = 'center';
-      adminLink.style.marginTop = '2rem';
-      adminLink.style.padding = '12px 10px';
-      adminLink.style.borderTop = '1px solid var(--border-color)';
-      adminLink.innerHTML = `
-        <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px;">Portal Corporativo Independiente para Personal Autorizado</p>
-        <a id="lnk-admin-portal" href="#" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; border: 1px dashed var(--primary-glow); padding: 6px 12px; border-radius: 8px; background-color: rgba(255,255,255,0.01);">
-          <span class="material-symbols-rounded" style="font-size: 16px;">admin_panel_settings</span>
-          Ingresar a www.petone.cl/${tenant.id} (Consola Admin) ➔
-        </a>
-      `;
-      container.appendChild(adminLink);
-      
-      document.getElementById('lnk-admin-portal').addEventListener('click', (e) => {
-        e.preventDefault();
-        navigateTo('admin-portal');
-      });
-    }
   }
 
   // Initial load

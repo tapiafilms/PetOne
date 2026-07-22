@@ -142,9 +142,6 @@ function renderAppShell() {
         <button id="btn-header-community" class="btn btn-secondary btn-icon" title="Guías de Cuidado" style="width: 32px; height: 32px; background: none; border: none;">
           <span class="material-symbols-rounded" style="font-size: 22px; color: var(--text-secondary);">menu_book</span>
         </button>
-        <button id="btn-header-analytics" class="btn btn-secondary btn-icon" title="Consola de Analíticas" style="width: 32px; height: 32px; background: none; border: none;">
-          <span class="material-symbols-rounded" style="font-size: 22px; color: var(--text-secondary);">bar_chart</span>
-        </button>
         <button id="btn-header-profile" class="btn btn-secondary btn-icon" title="Mi Cuenta" style="width: 32px; height: 32px; background: none; border: none;">
           <span class="material-symbols-rounded" style="font-size: 22px; color: var(--text-secondary);">account_circle</span>
         </button>
@@ -190,10 +187,6 @@ function renderAppShell() {
 
   document.getElementById('btn-header-community').addEventListener('click', () => {
     navigateTo('community');
-  });
-
-  document.getElementById('btn-header-analytics').addEventListener('click', () => {
-    navigateTo('analytics');
   });
 
   document.getElementById('btn-header-profile').addEventListener('click', () => {
