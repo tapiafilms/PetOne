@@ -1,6 +1,8 @@
 // Profile Component for user details, loyalty points and quick access to health tracker and subscriptions
 import { getProfile, getPets, addPet } from '../utils/db.js';
 import { navigateTo, showToast } from '../main.js';
+import { getTenantConfig } from '../config/tenantConfig.js';
+
 
 export async function renderProfile(container) {
   const profile = await getProfile();
@@ -155,6 +157,7 @@ export async function renderProfile(container) {
     });
 
     // General Menu Actions
+    const tenant = getTenantConfig();
     const menuActions = document.createElement('div');
     menuActions.style.display = 'flex';
     menuActions.style.flexDirection = 'column';
@@ -162,15 +165,17 @@ export async function renderProfile(container) {
     container.appendChild(menuActions);
 
     menuActions.innerHTML = `
-      <!-- Shop Owner Admin & B2B Entry Point -->
-      <button id="btn-menu-owner" class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 12px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(17, 24, 39, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.3);">
-        <span class="material-symbols-rounded" style="color: var(--secondary);">analytics</span>
-        <div style="flex: 1; margin-left: 8px;">
-          <div style="font-size: 0.85rem; font-weight: bold; color: white;">Panel del Dueño (B2B & Analíticas)</div>
-          <div style="font-size: 0.7rem; color: var(--text-muted);">Ventas, fricciones de góndola y conversión de anuncios</div>
-        </div>
-        <span class="material-symbols-rounded" style="color: var(--secondary); font-size: 18px;">chevron_right</span>
-      </button>
+      <!-- Shop Owner Admin & B2B Entry Point (Only visible on PetOne default developer mode) -->
+      ${tenant.id === 'default' ? `
+        <button id="btn-menu-owner" class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 12px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(17, 24, 39, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.3);">
+          <span class="material-symbols-rounded" style="color: var(--secondary);">analytics</span>
+          <div style="flex: 1; margin-left: 8px;">
+            <div style="font-size: 0.85rem; font-weight: bold; color: white;">Panel del Dueño (B2B & Analíticas)</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted);">Ventas, fricciones de góndola y conversión de anuncios</div>
+          </div>
+          <span class="material-symbols-rounded" style="color: var(--secondary); font-size: 18px;">chevron_right</span>
+        </button>
+      ` : ''}
 
       <button id="btn-menu-subs" class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 12px;">
         <span class="material-symbols-rounded" style="color: var(--primary);">autorenew</span>
@@ -215,7 +220,11 @@ export async function renderProfile(container) {
       });
     });
 
-    document.getElementById('btn-menu-owner').addEventListener('click', () => navigateTo('analytics'));
+    const btnOwner = document.getElementById('btn-menu-owner');
+    if (btnOwner) {
+      btnOwner.addEventListener('click', () => navigateTo('analytics'));
+    }
+    
     document.getElementById('btn-menu-subs').addEventListener('click', () => navigateTo('subscriptions'));
     document.getElementById('btn-menu-health').addEventListener('click', () => navigateTo('health', pets[0]?.id));
     document.getElementById('btn-menu-privacy').addEventListener('click', () => navigateTo('analytics')); // open privacy tab
@@ -225,6 +234,28 @@ export async function renderProfile(container) {
         window.location.reload();
       }
     });
+
+    // Append simulated external corporate link for administrators in Whitelabel mode
+    if (tenant.id !== 'default') {
+      const adminLink = document.createElement('div');
+      adminLink.style.textAlign = 'center';
+      adminLink.style.marginTop = '2rem';
+      adminLink.style.padding = '12px 10px';
+      adminLink.style.borderTop = '1px solid var(--border-color)';
+      adminLink.innerHTML = `
+        <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px;">Portal Corporativo Independiente para Personal Autorizado</p>
+        <a id="lnk-admin-portal" href="#" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; border: 1px dashed var(--primary-glow); padding: 6px 12px; border-radius: 8px; background-color: rgba(255,255,255,0.01);">
+          <span class="material-symbols-rounded" style="font-size: 16px;">admin_panel_settings</span>
+          Ingresar a www.petone.cl/${tenant.id} (Consola Admin) ➔
+        </a>
+      `;
+      container.appendChild(adminLink);
+      
+      document.getElementById('lnk-admin-portal').addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateTo('admin-portal');
+      });
+    }
   }
 
   // Initial load

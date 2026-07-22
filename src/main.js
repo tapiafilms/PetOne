@@ -13,10 +13,12 @@ import { renderCommunity } from './components/Community.js';
 import { renderProfile } from './components/Profile.js';
 import { renderFotoJuntos } from './components/FotoJuntos.js';
 import { renderCart } from './components/Cart.js';
-
+import { getTenantConfig, applyTenantStyles } from './config/tenantConfig.js';
+import { renderAdminPortal } from './components/AdminPortal.js';
 
 // Global State
 window.appState = {
+
   currentView: 'dashboard', // dashboard, catalog, services, stores, subscriptions, health, ai, analytics, community
   isOnline: navigator.onLine
 };
@@ -89,6 +91,8 @@ export async function navigateTo(view, extraData = null) {
     await renderFotoJuntos(pageContainer);
   } else if (view === 'cart') {
     await renderCart(pageContainer);
+  } else if (view === 'admin-portal') {
+    await renderAdminPortal(pageContainer);
   }
 }
 
@@ -184,6 +188,9 @@ function renderAppShell() {
   // Init cart badge count
   window.updateCartBadgeCount();
 
+  // Apply Whitelabel Tenant styling overrides dynamically
+  applyTenantStyles(getTenantConfig());
+
   updateNetworkUI();
 }
 
@@ -261,11 +268,15 @@ window.addEventListener('offline', () => {
 
 // App Initialization
 async function init() {
+  // Apply SaaS Whitelabel tenant styles on initial app launch
+  applyTenantStyles(getTenantConfig());
+  
   const profile = await getProfile();
   
   if (!profile) {
     const app = document.getElementById('app');
     app.innerHTML = '';
+
     
     const pageContainer = document.createElement('div');
     pageContainer.className = 'page';
