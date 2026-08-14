@@ -17,7 +17,7 @@ export default function RsvpPage({ eventId, guestToken, onRegisterComplete }) {
       
       // Guardar token en localStorage
       if (newGuest.rsvp_status === 'yes') {
-        localStorage.setItem(`cumpland_personal_token_${eventId}`, newGuest.personal_token)
+        localStorage.setItem(`petone_personal_token_${eventId}`, newGuest.personal_token)
         setRegisteredGuest(newGuest)
         setSuccess(true)
         
@@ -40,9 +40,9 @@ export default function RsvpPage({ eventId, guestToken, onRegisterComplete }) {
   if (loading || submitting) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center gap-4">
-        <Loader2 size={36} className="text-indigo-400 animate-spin" />
+        <Loader2 size={36} className="text-emerald-400 animate-spin" />
         <p className="text-sm text-slate-400">
-          {submitting ? 'Procesando tu confirmación...' : 'Cargando invitación...'}
+          {submitting ? 'Registrando mascota...' : 'Cargando paseo...'}
         </p>
       </div>
     )
@@ -54,9 +54,9 @@ export default function RsvpPage({ eventId, guestToken, onRegisterComplete }) {
         <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-xl font-bold mb-2">
           !
         </div>
-        <h3 className="text-lg font-bold text-white">Invitación Inválida o Expirada</h3>
+        <h3 className="text-lg font-bold text-white">Paseo Inválido o Expirado</h3>
         <p className="text-xs text-slate-400 max-w-xs">
-          El enlace de invitación que estás utilizando no es válido o el evento ya no existe. Verifica con el anfitrión.
+          El enlace de invitación que estás utilizando no es válido o la sesión de paseo ya ha finalizado.
         </p>
       </div>
     )
@@ -72,15 +72,15 @@ export default function RsvpPage({ eventId, guestToken, onRegisterComplete }) {
           <>
             <h3 className="text-xl font-bold text-white">¡Registro Exitoso!</h3>
             <p className="text-sm text-slate-450 max-w-sm mt-1">
-              Hemos confirmado la asistencia de **{registeredGuest.child_guest_name}**.
-              Redirigiéndote a tu tablero personal de cumpleaños...
+              Hemos confirmado el paseo de **{registeredGuest.child_guest_name}**.
+              Redirigiéndote al tablero en vivo del paseo...
             </p>
           </>
         ) : (
           <>
             <h3 className="text-xl font-bold text-white">¡Gracias por Responder!</h3>
             <p className="text-sm text-slate-450 max-w-sm mt-1">
-              Tu respuesta de no asistencia ha sido enviada al anfitrión. Ya puedes cerrar esta ventana.
+              Se ha cancelado la confirmación para esta mascota. Ya puedes cerrar esta pestaña.
             </p>
           </>
         )}

@@ -565,7 +565,9 @@ export default function EventBoard({ eventId, personalToken }) {
               <div className="flex flex-col gap-2 mt-3">
                 {currentGuest.authorized_pickups?.map((pickup, i) => (
                   <div key={i} className="flex justify-between items-center bg-slate-950/60 border border-slate-850 px-3 py-2 rounded-xl font-mono">
-                    <span className="text-xs text-slate-200 font-semibold">{pickup}</span>
+                    <span className="text-xs text-slate-200 font-semibold">
+                      {typeof pickup === 'object' ? (pickup.name || JSON.stringify(pickup)) : pickup}
+                    </span>
                     <button 
                       onClick={() => handleRemovePickup(i)}
                       disabled={submittingChanges}

@@ -55,16 +55,10 @@ export default function RsvpForm({ event, onRegisterSuccess }) {
         .concat(otherAllergies.trim() ? [otherAllergies.trim()] : [])
         .join(', ')
 
-      // Filtrar y agregar personas autorizadas (incluyendo al propio padre por defecto si no está)
+      // Filtrar y agregar direcciones/instrucciones de retiro y entrega
       const pickups = authorizedPickups
         .map(name => name.trim())
         .filter(name => name !== '')
-        .map(name => ({ name, relation: 'Autorizado' }))
-
-      // Por defecto, el apoderado responsable está siempre autorizado
-      if (rsvpStatus === 'yes' && parentName.trim()) {
-        pickups.unshift({ name: parentName.trim(), relation: 'Apoderado Responsable' })
-      }
 
       const guestData = {
         child_guest_name: childName.trim(),

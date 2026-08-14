@@ -143,7 +143,7 @@ export default function App() {
         if (guest) {
           // Guardar en localStorage para visitas futuras al rsvp genérico
           if (guest.rsvp_status === 'yes') {
-            localStorage.setItem(`cumpland_personal_token_${eventId}`, token)
+            localStorage.setItem(`petone_personal_token_${eventId}`, token)
           }
           setResolvedParams({ eventId, personalToken: token })
           setRoute('board')
@@ -182,7 +182,7 @@ export default function App() {
   }
 
   const handleSplashComplete = useCallback(() => {
-    sessionStorage.setItem('cumpland_splash_seen', '1')
+    sessionStorage.setItem('petone_splash_seen', '1')
     setShowSplash(false)
     setRoute('landing')
   }, [])
