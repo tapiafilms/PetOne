@@ -166,8 +166,9 @@ export default function LandingPage({ onNavigateToAdmin }) {
           }).catch(err => console.warn('Email send failed:', err))
         }
       }
-    } catch {
-      alert('Error en el pago o al registrar el evento. Intenta de nuevo.')
+    } catch (err) {
+      console.error('Error creating event:', err)
+      alert(`Error en el pago o al registrar el paseo: ${err.message || JSON.stringify(err)}`)
       setStep('form')
     }
   }
