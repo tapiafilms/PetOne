@@ -1,26 +1,25 @@
-import { useState, useRef, useCallback } from 'react'
-import { Volume2, VolumeX } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 export default function SplashScreen({ onComplete }) {
+  const [visible, setVisible] = useState(false)
   const [fading, setFading] = useState(false)
-  const [muted, setMuted] = useState(true)
   const videoRef = useRef(null)
+
+  useEffect(() => {
+    // Iniciar con un fade-in suave después del montaje
+    const timer = setTimeout(() => setVisible(true), 150)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleEnd = useCallback(() => {
     setFading(true)
     setTimeout(() => onComplete(), 600)
   }, [onComplete])
 
-  const toggleSound = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !muted
-      setMuted(!muted)
-    }
-  }
-
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-5">
-      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950">
+    <div className="fixed inset-0 z-[100] bg-[#020617] flex items-center justify-center p-5">
+      {/* Fondo contenedor: azul oscuro de la app (#020617) */}
+      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-[#020617]">
         <video
           ref={videoRef}
           src="/intro-petone.mp4"
@@ -28,23 +27,15 @@ export default function SplashScreen({ onComplete }) {
           playsInline
           muted
           onEnded={handleEnd}
-          className={`w-full h-full object-cover mix-blend-screen transition-opacity duration-500 ease-out ${
-            fading ? 'opacity-0' : 'opacity-100'
+          className={`w-full h-full object-cover mix-blend-screen transition-opacity duration-1000 ease-in-out ${
+            !visible || fading ? 'opacity-0' : 'opacity-100'
           }`}
         />
-        {/* Emerald tint overlay */}
-        <div className="absolute inset-0 bg-emerald-900/10 pointer-events-none" />
-        {/* Fade overlay */}
-        <div className={`absolute inset-0 bg-slate-950 transition-opacity duration-500 ease-out ${
+        
+        {/* Capa de fundido al terminar el video (hacia el fondo de la app) */}
+        <div className={`absolute inset-0 bg-[#020617] transition-opacity duration-500 ease-out pointer-events-none ${
           fading ? 'opacity-100' : 'opacity-0'
         }`} />
-        {/* Sound toggle */}
-        <button
-          onClick={toggleSound}
-          className="absolute top-4 right-4 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white/80 hover:text-white transition-colors cursor-pointer"
-        >
-          {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-        </button>
       </div>
     </div>
   )
