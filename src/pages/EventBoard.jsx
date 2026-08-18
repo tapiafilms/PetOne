@@ -313,7 +313,7 @@ export default function EventBoard({ eventId, personalToken }) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center gap-4">
         <Loader2 size={36} className="text-indigo-400 animate-spin" />
-        <p className="text-sm text-slate-400">Cargando tu tablero de cumpleaños...</p>
+        <p className="text-sm text-slate-400">Cargando tu tablero de paseo...</p>
       </div>
     )
   }
@@ -326,7 +326,7 @@ export default function EventBoard({ eventId, personalToken }) {
         </div>
         <h3 className="text-lg font-bold text-white">Acceso Denegado</h3>
         <p className="text-xs text-slate-450 max-w-xs">
-          No encontramos tu registro para este cumpleaños. Vuelve a hacer clic en tu enlace personal.
+          No encontramos tu registro para este paseo. Vuelve a hacer clic en tu enlace personal.
         </p>
       </div>
     )

@@ -74,7 +74,7 @@ export default function PhotoGallery({ media = [] }) {
               {item.media_type === 'photo' ? (
                 <img 
                   src={item.url} 
-                  alt="Cumpleaños" 
+                  alt="Paseo"
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (

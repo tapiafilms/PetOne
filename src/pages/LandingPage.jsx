@@ -49,14 +49,12 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [createdEvent, setCreatedEvent] = useState(null)
   const [copiedLink, setCopiedLink] = useState('')
 
-  const [preferenceId, setPreferenceId] = useState(null)
-
   const handleValidFormSubmit = async () => {
     setStep('processing')
-    const formData = getValues()
     // 1. Create a preference on your backend
     try {
       // Simulation of fetching preference ID
+      // const formData = getValues()
       // const response = await fetch('/api/create_preference', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
@@ -67,7 +65,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
       // Simulate backend response time
       await new Promise(resolve => setTimeout(resolve, 1000))
-      // setPreferenceId('mock-preference-id')
 
       // For now, bypass actual payment creation since backend isn't ready
       // Jump directly to simulate success
@@ -518,7 +515,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
       )}
 
       {/* ==================== CHECKOUT (MercadoPago) ==================== */}
-      {step === 'checkout' && preferenceId && (
+      {step === 'checkout' && (
         <main className="max-w-md mx-auto px-6 py-16">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-left relative">
             <button onClick={() => setStep('form')} className="absolute top-6 right-6 text-xs text-slate-400 hover:text-white">Cancelar</button>
@@ -534,7 +531,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
             {/* MercadoPago Brick */}
             <div id="wallet_container">
               <Payment
-                initialization={{ amount: 19990, preferenceId: preferenceId }}
+                initialization={{ amount: 19990 }}
                 customization={{ paymentMethods: { ticket: 'all', bankTransfer: 'all', creditCard: 'all', debitCard: 'all', mercadoPago: 'all' } }}
                 onSubmit={async () => {
                   // handle form submission

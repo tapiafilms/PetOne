@@ -4,14 +4,14 @@ import ProviderCard from './ProviderCard'
 import { Loader2 } from 'lucide-react'
 
 const MOCK_PROVIDERS = [
-  { id: 'p1', name: 'Mago Balbi', category: 'animador', zone: 'Santiago Oriente', phone: '+56999998888', price_range: '$$$', notes: 'Show de magia interactivo de 45 mins. Ideal para niños de 5 a 10 años.' },
-  { id: 'p2', name: 'Tía Carito Animaciones', category: 'animador', zone: 'Santiago Norte / Centro', phone: '+56911112222', price_range: '$$', notes: 'Pinta caritas, globoflexia y juegos grupales dinámicos.' },
-  { id: 'p3', name: 'Catering Petit-Gourmet', category: 'catering', zone: 'Toda la RM', phone: '+56933334444', price_range: '$$$', notes: 'Pizzas infantiles, jugos naturales y carritos de hot-dogs gourmet.' },
-  { id: 'p4', name: 'Globos Mágicos Deco', category: 'decoracion', zone: 'Santiago Sur', phone: '+56955556666', price_range: '$', notes: 'Arcos orgánicos de globos temáticos, fondos fotográficos y mesas decoradas.' },
-  { id: 'p5', name: 'Foto-Infantil Chile', category: 'fotografia', zone: 'Toda la RM', phone: '+56977778888', price_range: '$$', notes: 'Fotógrafo profesional especialista en capturar momentos espontáneos de niños.' }
+  { id: 'p1', name: 'Entrenamiento Canino Pro', category: 'entrenador', zone: 'Santiago Oriente', phone: '+56999998888', price_range: '$$$', notes: 'Adiestramiento interactivo de 45 mins. Ideal para cachorros y perros jóvenes.' },
+  { id: 'p2', name: 'Peluquería Canina Móvil', category: 'peluqueria', zone: 'Santiago Norte / Centro', phone: '+56911112222', price_range: '$$', notes: 'Baño, corte de pelo y uñas directo a tu domicilio.' },
+  { id: 'p3', name: 'Snacks Doggy-Gourmet', category: 'catering', zone: 'Toda la RM', phone: '+56933334444', price_range: '$$$', notes: 'Galletas sin gluten, tortas de carne y treats naturales para perros.' },
+  { id: 'p4', name: 'Tienda PetLife', category: 'accesorios', zone: 'Santiago Sur', phone: '+56955556666', price_range: '$', notes: 'Collares, correas, camas y juguetes para tus mascotas.' },
+  { id: 'p5', name: 'Foto-Pet Chile', category: 'fotografia', zone: 'Toda la RM', phone: '+56977778888', price_range: '$$', notes: 'Fotógrafo profesional especialista en capturar momentos espontáneos de mascotas.' }
 ]
 
-export default function ProviderDirectory({ eventName }) {
+export default function ProviderDirectory() {
   const [providers, setProviders] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('all')
@@ -46,9 +46,10 @@ export default function ProviderDirectory({ eventName }) {
 
   const filterOptions = [
     { value: 'all', label: 'Todos' },
-    { value: 'animador', label: 'Animación' },
+    { value: 'entrenador', label: 'Entrenador' },
     { value: 'catering', label: 'Comida' },
-    { value: 'decoracion', label: 'Decoración' },
+    { value: 'peluqueria', label: 'Peluquería' },
+    { value: 'accesorios', label: 'Accesorios' },
     { value: 'fotografia', label: 'Foto' }
   ]
 
@@ -94,8 +95,7 @@ export default function ProviderDirectory({ eventName }) {
           {filteredProviders.map(provider => (
             <ProviderCard 
               key={provider.id} 
-              provider={provider} 
-              eventName={eventName} 
+              provider={provider}
             />
           ))}
         </div>
