@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import { 
-  ShieldAlert, Utensils, UserCheck, Smartphone, 
-  Copy, Check, ArrowRight, Loader2, KeyRound, X, HelpCircle, AlertCircle, Dog, Activity
+  Utensils, Copy, Check, ArrowRight, Loader2, KeyRound, X, HelpCircle, AlertCircle, Dog,
+  MapPin, ShieldCheck, Sparkles
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -306,79 +306,135 @@ export default function LandingPage({ onNavigateToAdmin }) {
 
       {/* ==================== HOME ==================== */}
       {step === 'home' && (
-        <main className="max-w-6xl mx-auto px-6 pt-10 pb-8 min-h-screen flex flex-col items-center">
-          {/* Mobile Layout */}
-          <div className="md:hidden w-full flex flex-col items-center text-center">
-            <img src="/logo.png" alt="PetOne" className="w-[240px] mb-6 animate-fade-in-scale delay-1" />
-            <h1 className="text-3xl font-black text-white leading-tight mb-8 animate-fade-in-up delay-2">
-              Seguimiento en<br />vivo para el paseo<br />de tu mascota.
-            </h1>
-            <div className="mb-8 animate-fade-in-scale delay-3">
-              <img src="/dog_hero.jpg" alt="Paseando a tu perro" className="w-[200px] rounded-3xl mx-auto drop-shadow-2xl border border-emerald-500/20" />
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 min-h-screen flex flex-col justify-between">
+          {/* Header/Nav */}
+          <header className="w-full flex justify-between items-center py-4 mb-8 md:mb-12 animate-fade-in-scale delay-1">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <Dog size={18} />
+              </div>
+              <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">PetOne</span>
             </div>
-            <div className="grid grid-cols-2 gap-3 w-full mb-8">
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-left animate-fade-in-up delay-4">
-                <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit mb-2"><ShieldAlert size={16} /></div>
-                <h3 className="font-bold text-xs text-white mb-1">Check-out Seguro</h3>
-                <p className="text-[10px] text-slate-400 leading-relaxed">Notificación push inmediata al tutor cuando la mascota está en casa.</p>
-              </div>
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-left animate-fade-in-up delay-5">
-                <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 w-fit mb-2"><Utensils size={16} /></div>
-                <h3 className="font-bold text-xs text-white mb-1">Alergias y Cuidados</h3>
-                <p className="text-[10px] text-slate-400 leading-relaxed">Reporte consolidado de alimentación, vacunas y reactividad.</p>
-              </div>
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-left animate-fade-in-up delay-6">
-                <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20 w-fit mb-2"><UserCheck size={16} /></div>
-                <h3 className="font-bold text-xs text-white mb-1">Registro de Mascotas</h3>
-                <p className="text-[10px] text-slate-400 leading-relaxed">Los tutores registran a sus perros mediante un link único.</p>
-              </div>
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-left animate-fade-in-up delay-7">
-                <div className="p-1.5 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20 w-fit mb-2"><Smartphone size={16} /></div>
-                <h3 className="font-bold text-xs text-white mb-1">Instalación PWA</h3>
-                <p className="text-[10px] text-slate-400 leading-relaxed">Diseñado para móviles, ideal para usarlo en ruta sin descargas.</p>
-              </div>
-            </div>
-            <div className="w-full flex gap-3 mt-auto pb-4">
-              <button onClick={() => setStep('form')} className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm py-4 rounded-2xl transition-all active:scale-[0.97] shadow-lg shadow-emerald-600/20">
-                Crear Paseo
-              </button>
-              <button onClick={() => { setShowLoginModal(true); setLoginKey(''); setLoginError('') }} className="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-sm py-4 rounded-2xl transition-all active:scale-[0.97] shadow-lg shadow-amber-600/20">
-                Entrar con clave
-              </button>
-            </div>
-            <button onClick={() => { setShowRecoverModal(true); setRecoverAnswer(''); setRecoverError(''); setRecoverResult(null) }}
-              className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors py-1 cursor-pointer">
-              <HelpCircle size={12} /> ¿Olvidaste tu clave de paseo?
+            <button 
+              onClick={() => { setShowLoginModal(true); setLoginKey(''); setLoginError('') }} 
+              className="bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs px-4 py-2 rounded-full border border-slate-800 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <KeyRound size={12} />
+              <span>Acceso Paseador</span>
             </button>
+          </header>
+
+          {/* Hero Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full my-auto">
+            {/* Left Content Column */}
+            <div className="lg:col-span-7 flex flex-col text-left items-start animate-fade-in-up delay-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-6">
+                <Sparkles size={10} className="animate-pulse" /> Paseos de mascotas bajo control
+              </span>
+              
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6">
+                El paseo de tu perro, <br className="hidden sm:inline" />
+                <span className="bg-gradient-to-r from-emerald-400 via-teal-450 to-cyan-400 bg-clip-text text-transparent">en tiempo real.</span>
+              </h1>
+              
+              <p className="text-sm md:text-base text-slate-400 mb-8 max-w-lg leading-relaxed">
+                La plataforma premium para paseadores y tutores. Comparte el recorrido por GPS, envía fotos al instante y garantiza un retorno seguro a casa con alertas automáticas.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-4">
+                <button 
+                  onClick={() => setStep('form')} 
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm px-8 py-4 rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] w-full sm:w-auto text-center flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Crear Sesión de Paseo</span>
+                  <ArrowRight size={16} />
+                </button>
+                <button 
+                  onClick={() => { setShowLoginModal(true); setLoginKey(''); setLoginError('') }} 
+                  className="bg-slate-900/60 hover:bg-slate-800 text-slate-300 font-bold text-sm px-6 py-4 rounded-xl border border-slate-800 transition-all active:scale-[0.98] w-full sm:w-auto text-center flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <KeyRound size={14} className="text-slate-400" />
+                  <span>Entrar con clave</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Graphic Column */}
+            <div className="lg:col-span-5 w-full flex justify-center lg:justify-end animate-fade-in-scale delay-3 mt-4 lg:mt-0">
+              <div className="relative w-full max-w-[320px] aspect-[4/5] sm:aspect-square md:aspect-[4/5] rounded-[32px] overflow-hidden border border-emerald-500/10 shadow-2xl group">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 opacity-70" />
+                <img 
+                  src="/dog_hero.jpg" 
+                  alt="Mascota feliz" 
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                />
+                
+                {/* Simulated live route badge */}
+                <div className="absolute top-4 left-4 z-20 bg-slate-950/85 backdrop-blur-md border border-slate-800/80 rounded-2xl p-3 flex items-center gap-2 shadow-xl">
+                  <div className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">Ruta en vivo</span>
+                </div>
+
+                {/* Simulated status overlay card */}
+                <div className="absolute bottom-4 left-4 right-4 z-20 bg-slate-950/90 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] text-slate-400 font-medium">Paseo: Rocky y amigos</span>
+                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">En el parque</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs">🐕</div>
+                    <div className="flex-1">
+                      <div className="h-1.5 bg-slate-850 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 w-[75%]" />
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-mono">16:45</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Desktop Layout */}
-          <div className="hidden md:flex w-full flex-row items-center justify-between gap-12 mt-8">
-            <div className="flex-1 text-left">
-              <span className="text-xs text-emerald-400 font-extrabold uppercase tracking-widest mb-3 block">PetOne, paseamos a tu can</span>
-              <h1 className="text-5xl font-black text-white leading-tight mb-6">
-                Seguimiento en vivo para el paseo de tu mascota.
-              </h1>
-              <p className="text-base text-slate-400 mb-8 max-w-md leading-relaxed">
-                Rastreo GPS en tiempo real, fotos del paseo instantáneas, control de entrega seguro en casa, ficha técnica de la mascota y chat directo. Todo lo que necesitas para tu tranquilidad.
-              </p>
-              <div className="flex gap-4 items-center">
-                <button onClick={() => setStep('form')} className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm py-4 px-8 rounded-2xl transition-all active:scale-[0.97] shadow-lg shadow-emerald-600/20">
-                  Crear Paseo
-                </button>
-                <button onClick={() => { setShowLoginModal(true); setLoginKey(''); setLoginError('') }} className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm py-4 px-8 rounded-2xl transition-all active:scale-[0.97] border border-slate-700 flex items-center gap-2">
-                  <KeyRound size={14} /> Entrar con Clave
-                </button>
+          {/* Value Props Section */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 md:mt-16 animate-fade-in-up delay-4">
+            <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit mb-4 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+                <MapPin size={18} />
               </div>
-              <button onClick={() => { setShowRecoverModal(true); setRecoverAnswer(''); setRecoverError(''); setRecoverResult(null) }}
-                className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors mt-3 cursor-pointer w-fit">
-                <HelpCircle size={12} /> ¿Olvidaste tu clave?
-              </button>
+              <h3 className="font-bold text-sm text-white mb-1.5">Monitoreo GPS Continuo</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Comparte coordenadas en directo con un enlace dinámico de fricción cero para los tutores.</p>
             </div>
-            <div className="flex-1 flex justify-center">
-              <img src="/dog_hero.jpg" alt="Paseando a tu perro" className="w-[320px] rounded-3xl drop-shadow-2xl animate-fade-in-scale delay-3 border border-emerald-500/20" />
+            
+            <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 w-fit mb-4 group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors">
+                <Utensils size={18} />
+              </div>
+              <h3 className="font-bold text-sm text-white mb-1.5">Ficha Médica y Conducta</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Acceso ágil a alergias, medicamentos, reactividad y contacto directo desde la ruta.</p>
+            </div>
+            
+            <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
+              <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 w-fit mb-4 group-hover:bg-teal-500 group-hover:text-slate-950 transition-colors">
+                <ShieldCheck size={18} />
+              </div>
+              <h3 className="font-bold text-sm text-white mb-1.5">Entrega Segura y Alertas</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Check-out de puerta con notificaciones automáticas inmediatas al tutor del perro.</p>
             </div>
           </div>
+
+          {/* Footer Recover Key */}
+          <footer className="w-full text-center mt-12 pt-4 border-t border-slate-900/60 animate-fade-in-up delay-5">
+            <button 
+              onClick={() => { setShowRecoverModal(true); setRecoverAnswer(''); setRecoverError(''); setRecoverResult(null) }}
+              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors py-2 cursor-pointer"
+            >
+              <HelpCircle size={13} /> 
+              <span>¿Olvidaste tu clave de paseo? Recupérala aquí</span>
+            </button>
+          </footer>
         </main>
       )}
 
