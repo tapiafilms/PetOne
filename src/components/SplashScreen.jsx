@@ -28,7 +28,7 @@ export default function SplashScreen({ onComplete }) {
           playsInline
           muted
           onEnded={handleEnd}
-          className={`w-full h-full object-cover transition-opacity duration-500 ease-out ${
+          className={`w-full h-full object-cover mix-blend-screen transition-opacity duration-500 ease-out ${
             fading ? 'opacity-0' : 'opacity-100'
           }`}
         />
