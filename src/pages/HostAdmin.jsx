@@ -15,7 +15,7 @@ import {
   AlertTriangle, Calendar, MapPin, Copy, Check, 
   UserMinus, RefreshCw,
   Camera, Video, Loader2, Play, Download, X,
-  Home, Users, Clock, Truck, MessageCircle, Image as ImageIcon, Car, Compass, Dog
+  Home, Users, Clock, Truck, MessageCircle, Image as ImageIcon, Car, Compass
 } from 'lucide-react'
 
 export default function HostAdmin({ eventId, hostToken }) {
@@ -411,7 +411,7 @@ export default function HostAdmin({ eventId, hostToken }) {
     try {
       const JSZip = (await import('jszip')).default
       const zip = new JSZip()
-      const folder = zip.folder(`${event?.child_name || 'cumpleanos'}-fotos`)
+      const folder = zip.folder(`${event?.child_name || 'paseos'}-fotos`)
 
       let downloaded = 0
       let failed = 0
@@ -444,7 +444,7 @@ export default function HostAdmin({ eventId, hostToken }) {
       const blobUrl = window.URL.createObjectURL(content)
       const link = document.createElement('a')
       link.href = blobUrl
-      link.download = `${event?.child_name || 'cumpleanos'}-fotos.zip`
+      link.download = `${event?.child_name || 'paseos'}-fotos.zip`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -854,7 +854,7 @@ export default function HostAdmin({ eventId, hostToken }) {
                     ⚙️ Gestión del Evento
                   </span>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Cuando termine el cumpleaños, marca la fiesta como finalizada para programar la destrucción automática de los archivos multimedia en 12 horas por privacidad.
+                    Cuando termine el paseo, marca la fiesta como finalizada para programar la destrucción automática de los archivos multimedia en 12 horas por privacidad.
                   </p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto shrink-0">
@@ -887,7 +887,6 @@ export default function HostAdmin({ eventId, hostToken }) {
             guests={guests} 
             onCheckoutToggle={handleHostCheckout} 
             eventId={eventId} 
-            birthdayKidName={event.child_name} 
           />
           {declinedGuests.length > 0 && (
             <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 text-left">
@@ -924,7 +923,7 @@ export default function HostAdmin({ eventId, hostToken }) {
         <div className="max-w-2xl mx-auto px-6 pt-8 pb-6">
           <h1 className="text-3xl font-extrabold text-white mb-6">Servicios Recomendados</h1>
           <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 text-left">
-            <ProviderDirectory eventName={event.child_name} />
+            <ProviderDirectory />
           </div>
         </div>
       )}
@@ -1009,8 +1008,8 @@ export default function HostAdmin({ eventId, hostToken }) {
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md flex flex-col gap-5 text-left max-h-[90vh] overflow-y-auto safe-area-top safe-area-bottom">
           <div>
-            <h3 className="text-lg font-extrabold text-white">Etiquetar Niños</h3>
-            <p className="text-xs text-slate-400 mt-1">Selecciona los niños que aparecen en la captura para que se publique en su feed privado.</p>
+            <h3 className="text-lg font-extrabold text-white">Etiquetar Mascotas</h3>
+            <p className="text-xs text-slate-400 mt-1">Selecciona las mascotas que aparecen en la captura para que se publique en su feed privado.</p>
           </div>
           <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-850 bg-slate-950 flex items-center justify-center">
             {pendingMedia.type === 'photo' ? (
@@ -1049,7 +1048,7 @@ export default function HostAdmin({ eventId, hostToken }) {
             )}
           </div>
           <p className="text-[10px] text-slate-500 leading-relaxed italic">
-            * Nota: Si no seleccionas ningún niño, el archivo será visible de forma general para todos los invitados del cumpleaños.
+            * Nota: Si no seleccionas ninguna mascota, el archivo será visible de forma general para todos los invitados del paseo.
           </p>
           <div className="flex gap-3 border-t border-slate-850 pt-4">
             <button

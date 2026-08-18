@@ -2,7 +2,7 @@ import React from 'react'
 import { generateWhatsAppLink } from '../lib/waLink'
 import { Send, MapPin } from 'lucide-react'
 
-export default function ProviderCard({ provider, eventName }) {
+export default function ProviderCard({ provider }) {
   const getPrefilledMessage = () => {
     return `¡Hola ${provider.name}! Vi tu servicio en PetOne. Quisiera cotizar tus servicios de ${provider.category} para mi mascota. ¿Tienes disponibilidad?`
   }
