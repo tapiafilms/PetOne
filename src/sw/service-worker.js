@@ -31,7 +31,7 @@ self.addEventListener('push', (event) => {
     // Fallback si el payload no es JSON
     const text = event.data.text()
     event.waitUntil(
-      self.registration.showNotification('Cumpland', {
+      self.registration.showNotification('PetOne', {
         body: text,
         icon: '/pwa-192x192.png',
         badge: '/pwa-192x192.png'

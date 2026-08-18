@@ -12,7 +12,7 @@ const supabaseAnonKey = isSupabaseConfigured ? rawKey : 'placeholder-anon-key'
 
 if (!isSupabaseConfigured) {
   console.warn(
-    'Supabase URL or Anon Key is missing. Cumpland is running in LOCAL DEMO MODE (saving data in localStorage).'
+    'Supabase URL or Anon Key is missing. PetOne is running in LOCAL DEMO MODE (saving data in localStorage).'
   )
 }
 

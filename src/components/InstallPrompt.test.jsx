@@ -31,6 +31,6 @@ describe('InstallPrompt Component', () => {
       vi.advanceTimersByTime(3000)
     })
 
-    expect(screen.getByText(/Instalar App Cumpland/i)).toBeInTheDocument()
+    expect(screen.getByText(/Instalar App PetOne/i)).toBeInTheDocument()
   })
 })

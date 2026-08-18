@@ -3,7 +3,7 @@
  * Resuelve el límite de 5MB de localStorage.
  */
 
-const DB_NAME = 'cumpland_demo'
+const DB_NAME = 'petone_demo'
 const DB_VERSION = 1
 const MEDIA_STORE = 'media'
 

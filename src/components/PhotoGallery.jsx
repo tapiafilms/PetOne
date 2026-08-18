@@ -38,7 +38,7 @@ export default function PhotoGallery({ media = [] }) {
       const blobUrl = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = blobUrl
-      link.download = filename || 'cumpland-media'
+      link.download = filename || 'petone-media'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

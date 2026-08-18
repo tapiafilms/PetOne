@@ -4,16 +4,16 @@ import { Send, MapPin } from 'lucide-react'
 
 export default function ProviderCard({ provider, eventName }) {
   const getPrefilledMessage = () => {
-    return `¡Hola ${provider.name}! Vi tu servicio en Cumpland. Quisiera cotizar tus servicios de ${provider.category} para el cumpleaños de ${eventName || 'mi hijo/a'}. ¿Tienes disponibilidad?`
+    return `¡Hola ${provider.name}! Vi tu servicio en PetOne. Quisiera cotizar tus servicios de ${provider.category} para mi mascota. ¿Tienes disponibilidad?`
   }
 
   const waLink = generateWhatsAppLink(provider.phone, getPrefilledMessage())
 
   const categoryLabels = {
-    animador: '🎭 Animación / Show',
-    catering: '🍕 Comida / Catering',
-    decoracion: '🎈 Decoración / Globos',
-    fotografia: '📷 Fotografía / Video',
+    veterinario: '🏥 Veterinario',
+    tienda: '🛍️ Pet Shop',
+    entrenador: '🦮 Entrenador / Conducta',
+    paseador: '🐾 Paseador',
     otro: '✨ Otros Servicios'
   }
 
@@ -22,7 +22,7 @@ export default function ProviderCard({ provider, eventName }) {
       <div className="flex flex-col gap-2">
         {/* Categoría y Precio */}
         <div className="flex justify-between items-center">
-          <span className="text-[10px] font-black bg-indigo-500/10 border border-indigo-500/25 text-indigo-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+          <span className="text-[10px] font-black bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
             {categoryLabels[provider.category] || provider.category}
           </span>
           <span className="flex text-amber-500 text-xs">

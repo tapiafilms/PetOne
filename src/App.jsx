@@ -26,7 +26,7 @@ export default function App() {
   useEffect(() => {
     if (!eventId || !token) {
       // Solo mostrar splash en mobile en la home page, una vez por sesión
-      if (isMobileDevice() && !sessionStorage.getItem('cumpland_splash_seen')) {
+      if (isMobileDevice() && !sessionStorage.getItem('petone_splash_seen')) {
         setShowSplash(true)
       } else {
         setRoute('landing')
@@ -103,7 +103,7 @@ export default function App() {
             setRoute('admin')
           } else if (token === event.guest_token) {
             // Es un link de invitación general. Verificar si ya tiene token personal en localStorage
-            const storedPersonalToken = localStorage.getItem(`cumpland_personal_token_${eventId}`)
+            const storedPersonalToken = localStorage.getItem(`petone_personal_token_${eventId}`)
             
             if (storedPersonalToken) {
               // Validar que el token personal del localStorage corresponda a un invitado confirmado

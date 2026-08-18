@@ -58,21 +58,21 @@ export default function InstallPrompt() {
       </button>
 
       <div className="flex gap-4 items-start">
-        <div className="p-2.5 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+        <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-450 border border-emerald-500/20 shrink-0">
           <Smartphone size={20} className="animate-pulse" />
         </div>
 
         <div className="flex-1">
-          <h4 className="font-extrabold text-sm text-white">Instalar App Cumpland</h4>
+          <h4 className="font-extrabold text-sm text-white">Instalar App PetOne</h4>
           <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-            Instala la aplicación en tu celular para activar el **Check-Out de Retiro Seguro** y recibir alertas en tiempo real.
+            Instala la aplicación en tu celular para activar el **Check-Out de Entrega Segura** y recibir alertas en tiempo real.
           </p>
 
           {/* Prompt de Android (Acción directa) */}
           {platform === 'android' && (
             <button
               onClick={handleInstallAndroid}
-              className="mt-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-indigo-600/15"
+              className="mt-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-emerald-600/15"
             >
               <Download size={13} />
               Instalar Ahora
@@ -82,7 +82,7 @@ export default function InstallPrompt() {
           {/* Prompt de iOS (Instrucciones) */}
           {platform === 'ios' && (
             <div className="mt-3 border-t border-slate-850 pt-3 flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-indigo-300 block uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">
                 Instrucciones para iPhone:
               </span>
               <div className="flex flex-col gap-1.5 text-xs text-slate-400">
