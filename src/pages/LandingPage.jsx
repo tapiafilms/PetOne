@@ -309,13 +309,11 @@ export default function LandingPage({ onNavigateToAdmin }) {
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 min-h-screen flex flex-col justify-between">
           {/* Header/Nav */}
           <header className="w-full flex justify-between items-center py-4 mb-8 md:mb-12 animate-fade-in-scale delay-1">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <Dog size={18} />
-              </div>
+            <div className="flex items-center gap-3">
+              <img src="/logo-petone.png" alt="PetOne Logo" className="h-10 w-auto object-contain rounded-lg border border-emerald-500/10" />
               <div className="flex flex-col text-left">
                 <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white to-slate-350 bg-clip-text text-transparent leading-none">PetOne</span>
-                <span className="text-[9px] text-slate-500 font-semibold tracking-wider uppercase leading-none mt-0.5">Control de Paseos</span>
+                <span className="text-[9px] text-emerald-400 font-semibold tracking-wider uppercase leading-none mt-0.5">Control de Paseos</span>
               </div>
             </div>
             <button 
