@@ -313,7 +313,10 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <Dog size={18} />
               </div>
-              <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">PetOne</span>
+              <div className="flex flex-col text-left">
+                <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white to-slate-350 bg-clip-text text-transparent leading-none">PetOne</span>
+                <span className="text-[9px] text-slate-500 font-semibold tracking-wider uppercase leading-none mt-0.5">Control de Paseos</span>
+              </div>
             </div>
             <button 
               onClick={() => { setShowLoginModal(true); setLoginKey(''); setLoginError('') }} 
@@ -329,16 +332,16 @@ export default function LandingPage({ onNavigateToAdmin }) {
             {/* Left Content Column */}
             <div className="lg:col-span-7 flex flex-col text-left items-start animate-fade-in-up delay-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-6">
-                <Sparkles size={10} className="animate-pulse" /> Paseos de mascotas bajo control
+                <Sparkles size={10} className="animate-pulse" /> La app definitiva para paseadores de perros
               </span>
               
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6">
-                El paseo de tu perro, <br className="hidden sm:inline" />
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-450 to-cyan-400 bg-clip-text text-transparent">en tiempo real.</span>
+                Profesionaliza tus paseos. <br className="hidden sm:inline" />
+                <span className="bg-gradient-to-r from-emerald-400 via-teal-450 to-cyan-400 bg-clip-text text-transparent">Da tranquilidad a tus clientes.</span>
               </h1>
               
               <p className="text-sm md:text-base text-slate-400 mb-8 max-w-lg leading-relaxed">
-                La plataforma premium para paseadores y tutores. Comparte el recorrido por GPS, envía fotos al instante y garantiza un retorno seguro a casa con alertas automáticas.
+                Comparte la ruta GPS en vivo, gestiona fichas médicas en el camino y notifica entregas seguras de forma automática. Menos mensajes manuales de WhatsApp, mayor confianza y profesionalismo en tu servicio.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-4">
@@ -404,24 +407,24 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit mb-4 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
                 <MapPin size={18} />
               </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">Monitoreo GPS Continuo</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">Comparte coordenadas en directo con un enlace dinámico de fricción cero para los tutores.</p>
+              <h3 className="font-bold text-sm text-white mb-1.5">Seguimiento Transparente</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Comparte un enlace de rastreo en vivo único con los dueños sin obligarlos a descargar apps.</p>
             </div>
             
             <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
               <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 w-fit mb-4 group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors">
                 <Utensils size={18} />
               </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">Ficha Médica y Conducta</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">Acceso ágil a alergias, medicamentos, reactividad y contacto directo desde la ruta.</p>
+              <h3 className="font-bold text-sm text-white mb-1.5">Gestión de Manada</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Lleva en tu celular las alertas de salud, alergias, comportamiento e indicaciones de entrega de cada mascota.</p>
             </div>
             
             <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
               <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 w-fit mb-4 group-hover:bg-teal-500 group-hover:text-slate-950 transition-colors">
                 <ShieldCheck size={18} />
               </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">Entrega Segura y Alertas</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">Check-out de puerta con notificaciones automáticas inmediatas al tutor del perro.</p>
+              <h3 className="font-bold text-sm text-white mb-1.5">Check-out Automatizado</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Marca la entrega de cada perro y envía una notificación push inmediata de regreso seguro a casa.</p>
             </div>
           </div>
 
