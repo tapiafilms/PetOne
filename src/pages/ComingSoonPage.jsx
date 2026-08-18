@@ -37,7 +37,7 @@ export default function ComingSoonPage() {
         {/* Coming Soon Title */}
         <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white mb-4 animate-fade-in-up delay-3 leading-tight">
           Pronto <br className="sm:hidden" />
-          <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">PetOne</span>
+          <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">PetOne Chile</span>
         </h1>
 
         {/* Description */}
