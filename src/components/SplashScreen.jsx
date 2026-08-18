@@ -20,10 +20,10 @@ export default function SplashScreen({ onComplete }) {
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-5">
-      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-gradient-to-br from-violet-950 via-indigo-950 to-slate-950">
+      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950">
         <video
           ref={videoRef}
-          src="/intro-cumpland.mp4"
+          src="/intro-petone.mp4"
           autoPlay
           playsInline
           muted
@@ -32,8 +32,8 @@ export default function SplashScreen({ onComplete }) {
             fading ? 'opacity-0' : 'opacity-100'
           }`}
         />
-        {/* Purple tint overlay */}
-        <div className="absolute inset-0 bg-violet-900/30 pointer-events-none" />
+        {/* Emerald tint overlay */}
+        <div className="absolute inset-0 bg-emerald-900/10 pointer-events-none" />
         {/* Fade overlay */}
         <div className={`absolute inset-0 bg-slate-950 transition-opacity duration-500 ease-out ${
           fading ? 'opacity-100' : 'opacity-0'
