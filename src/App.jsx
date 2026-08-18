@@ -9,6 +9,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'))
 const RsvpPage = lazy(() => import('./pages/RsvpPage'))
 const HostAdmin = lazy(() => import('./pages/HostAdmin'))
 const EventBoard = lazy(() => import('./pages/EventBoard'))
+const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'))
 
 const isMobileDevice = () => window.matchMedia('(max-width: 768px)').matches
 
@@ -29,7 +30,9 @@ export default function App() {
       if (isMobileDevice() && !sessionStorage.getItem('petone_splash_seen')) {
         setShowSplash(true)
       } else {
-        setRoute('landing')
+        const urlParams = new URLSearchParams(window.location.search)
+        const isPreview = urlParams.get('preview') === 'true' || urlParams.get('setup') === 'true'
+        setRoute(isPreview ? 'landing' : 'comingsoon')
       }
       setLoading(false)
       return
@@ -184,7 +187,9 @@ export default function App() {
   const handleSplashComplete = useCallback(() => {
     sessionStorage.setItem('petone_splash_seen', '1')
     setShowSplash(false)
-    setRoute('landing')
+    const urlParams = new URLSearchParams(window.location.search)
+    const isPreview = urlParams.get('preview') === 'true' || urlParams.get('setup') === 'true'
+    setRoute(isPreview ? 'landing' : 'comingsoon')
   }, [])
 
   if (loading || route === 'loading') {
@@ -208,6 +213,10 @@ export default function App() {
           <Loader2 size={40} className="text-indigo-400 animate-spin" />
         </div>
       }>
+        {route === 'comingsoon' && (
+          <ComingSoonPage />
+        )}
+
         {route === 'landing' && (
           <LandingPage onNavigateToAdmin={handleNavigateToAdmin} />
         )}
