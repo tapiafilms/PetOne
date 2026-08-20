@@ -26,6 +26,12 @@ export default function App() {
 
   useEffect(() => {
     if (!eventId || !token) {
+      if (window.location.pathname === '/home') {
+        setRoute('landing')
+        setLoading(false)
+        return
+      }
+
       // Solo mostrar splash en mobile en la home page, una vez por sesión
       if (isMobileDevice() && !sessionStorage.getItem('petone_splash_seen')) {
         setShowSplash(true)
