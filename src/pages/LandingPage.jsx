@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import { 
   Utensils, Copy, Check, ArrowRight, Loader2, KeyRound, X, HelpCircle, AlertCircle, Dog,
-  MapPin, ShieldCheck, Sparkles
+  MapPin, ShieldCheck, Sparkles, ClipboardList, Send, Radio
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -400,6 +400,53 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
                     <span className="text-[10px] text-slate-400 font-mono">16:45</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* How It Works Section */}
+          <div className="w-full mt-14 md:mt-20 animate-fade-in-up delay-4">
+            <div className="text-center mb-10">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4">
+                <Sparkles size={10} /> Cómo funciona
+              </span>
+              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                3 pasos para un paseo profesional
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative">
+              {/* Connector line (desktop only) */}
+              <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-emerald-500/50 via-teal-500/50 to-cyan-500/50 -z-0" />
+
+              {/* Step 1 */}
+              <div className="relative flex flex-col items-center text-center group">
+                <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center mb-5 shadow-lg shadow-emerald-600/20 group-hover:scale-105 transition-transform">
+                  <ClipboardList size={24} className="text-white" />
+                </div>
+                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-2">Paso 1</span>
+                <h3 className="font-bold text-sm text-white mb-1.5">Crea tu paseo</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-[220px]">Llena un formulario con los datos del paseo: mascota, fecha, ruta y cuidados especiales.</p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="relative flex flex-col items-center text-center group">
+                <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center mb-5 shadow-lg shadow-teal-600/20 group-hover:scale-105 transition-transform">
+                  <Send size={24} className="text-white" />
+                </div>
+                <span className="text-[10px] text-teal-400 font-bold uppercase tracking-widest mb-2">Paso 2</span>
+                <h3 className="font-bold text-sm text-white mb-1.5">Comparte con los dueños</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-[220px]">La app envía un enlace único a cada dueño para que pueda seguir a su mascota en tiempo real.</p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="relative flex flex-col items-center text-center group">
+                <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-600 to-blue-600 flex items-center justify-center mb-5 shadow-lg shadow-cyan-600/20 group-hover:scale-105 transition-transform">
+                  <Radio size={24} className="text-white" />
+                </div>
+                <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-2">Paso 3</span>
+                <h3 className="font-bold text-sm text-white mb-1.5">Paseo en vivo</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-[220px]">Inicia la ruta mientras los dueños ven cada paso, foto y actualización en vivo.</p>
               </div>
             </div>
           </div>
