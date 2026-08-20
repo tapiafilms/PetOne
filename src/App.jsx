@@ -283,7 +283,7 @@ export default function App() {
           </div>
           <h3 className="text-lg font-bold text-white">Evento o Enlace No Encontrado</h3>
           <p className="text-xs text-slate-450 max-w-xs">
-            El cumpleaños al que intentas acceder no existe, o tu token de acceso ha expirado. Por favor, solicita un nuevo enlace.
+            El paseo al que intentas acceder no existe, o tu token de acceso ha expirado. Por favor, solicita un nuevo enlace.
           </p>
           <a 
             href={window.location.origin}

@@ -854,7 +854,7 @@ export default function HostAdmin({ eventId, hostToken }) {
                     ⚙️ Gestión del Evento
                   </span>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Cuando termine el cumpleaños, marca la fiesta como finalizada para programar la destrucción automática de los archivos multimedia en 12 horas por privacidad.
+                    Cuando termine el paseo, marca la sesión como finalizada para programar la destrucción automática de los archivos multimedia en 12 horas por privacidad.
                   </p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto shrink-0">
@@ -1049,7 +1049,7 @@ export default function HostAdmin({ eventId, hostToken }) {
             )}
           </div>
           <p className="text-[10px] text-slate-500 leading-relaxed italic">
-            * Nota: Si no seleccionas ningún niño, el archivo será visible de forma general para todos los invitados del cumpleaños.
+            * Nota: Si no seleccionas ningún cliente, el archivo será visible de forma general para todos los invitados del paseo.
           </p>
           <div className="flex gap-3 border-t border-slate-850 pt-4">
             <button
