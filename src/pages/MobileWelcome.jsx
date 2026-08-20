@@ -63,11 +63,11 @@ export default function MobileWelcome({ onNavigateToAdmin, onStartCreate }) {
         {/* Tagline */}
         <div className="flex flex-col gap-2 animate-fade-in-up delay-2">
           <h1 className="text-2xl font-black text-white leading-tight tracking-tight">
-            Tu mascota, <br />
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">siempre a la vista.</span>
+            Profesionaliza tus paseos. <br />
+            <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Gana la confianza de tus clientes.</span>
           </h1>
           <p className="text-sm text-slate-400 leading-relaxed max-w-xs mx-auto">
-            Ruta GPS en vivo, fichas médicas y notificaciones automáticas para tus paseos.
+            Ruta GPS en vivo, fichas médicas y check-out automático. Todo lo que necesitas en tu bolsillo.
           </p>
         </div>
 
