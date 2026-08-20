@@ -11,8 +11,8 @@ import {
   Loader2, UserCheck, Clock, MessageCircle, MapPin, Navigation, Car
 } from 'lucide-react'
 
-export default function EventBoard({ eventId, personalToken }) {
-  const { event, currentGuest, media, loading, error, refresh, updateGuest } = useEventData(eventId, null, personalToken)
+export default function EventBoard({ eventId, guestToken, personalToken }) {
+  const { event, currentGuest, media, loading, error, refresh, updateGuest } = useEventData(eventId, guestToken, personalToken)
   const { isSubscribed, loading: pushLoading, subscribe, unsubscribe } = usePushSubscription(currentGuest, updateGuest)
 
   // Estados locales para edición de autorizados y alergias

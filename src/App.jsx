@@ -74,7 +74,8 @@ export default function App() {
                 const guest = guests.find(g => g.personal_token === storedPersonalToken)
                 
                 if (guest && guest.rsvp_status === 'yes') {
-                  setResolvedParams({ eventId, personalToken: storedPersonalToken })
+                  const storedGuestToken = localStorage.getItem(`petone_guest_token_${eventId}`)
+                  setResolvedParams({ eventId, personalToken: storedPersonalToken, guestToken: storedGuestToken || token })
                   setRoute('board')
                   setLoading(false)
                   return
@@ -94,7 +95,8 @@ export default function App() {
                 if (guest.rsvp_status === 'yes') {
                   localStorage.setItem(`petone_personal_token_${eventId}`, token)
                 }
-                setResolvedParams({ eventId, personalToken: token })
+                const storedGuestToken = localStorage.getItem(`petone_guest_token_${eventId}`)
+                setResolvedParams({ eventId, personalToken: token, guestToken: storedGuestToken })
                 setRoute('board')
                 setLoading(false)
                 return
@@ -133,7 +135,8 @@ export default function App() {
                 .single()
 
               if (guest && guest.rsvp_status === 'yes') {
-                setResolvedParams({ eventId, personalToken: storedPersonalToken })
+                const storedGuestToken = localStorage.getItem(`petone_guest_token_${eventId}`)
+                setResolvedParams({ eventId, personalToken: storedPersonalToken, guestToken: storedGuestToken || event.guest_token })
                 setRoute('board')
                 setLoading(false)
                 return
@@ -162,7 +165,8 @@ export default function App() {
           if (guest.rsvp_status === 'yes') {
             localStorage.setItem(`petone_personal_token_${eventId}`, token)
           }
-          setResolvedParams({ eventId, personalToken: token })
+          const storedGuestToken = localStorage.getItem(`petone_guest_token_${eventId}`)
+          setResolvedParams({ eventId, personalToken: token, guestToken: storedGuestToken })
           setRoute('board')
           setLoading(false)
           return
@@ -192,9 +196,13 @@ export default function App() {
 
   // Navegar tras auto-registro de invitado exitoso
   const handleRegisterComplete = (newPersonalToken) => {
+    // Guardar guest_token en localStorage para poder acceder a events después
+    if (resolvedParams.guestToken) {
+      localStorage.setItem(`petone_guest_token_${eventId}`, resolvedParams.guestToken)
+    }
     const newUrl = `${window.location.origin}${window.location.pathname}?e=${eventId}&t=${newPersonalToken}`
     window.history.pushState({ path: newUrl }, '', newUrl)
-    setResolvedParams({ eventId, personalToken: newPersonalToken })
+    setResolvedParams({ eventId, personalToken: newPersonalToken, guestToken: resolvedParams.guestToken })
     setRoute('board')
   }
 
@@ -271,6 +279,7 @@ export default function App() {
         {route === 'board' && (
           <EventBoard
             eventId={resolvedParams.eventId}
+            guestToken={resolvedParams.guestToken}
             personalToken={resolvedParams.personalToken}
           />
         )}
