@@ -504,8 +504,8 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
 
             <form onSubmit={handleSubmit(handleValidFormSubmit)} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-xs font-semibold text-slate-300">Nombre de la Mascota o del Grupo de Paseo</label>
-                <input type="text" placeholder="Ej: Rocky y amigos, Paseo de la Tarde..."
+                <label className="text-xs font-semibold text-slate-300">Nombre del paseador</label>
+                <input type="text" placeholder="Ej: Pedro, Paseos con Luna..."
                   {...register("childName")}
                   className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-base text-white placeholder-slate-600 focus:outline-none transition-colors ${errors.childName ? 'border-red-500/50 focus:border-red-500' : 'border-slate-800 focus:border-emerald-500'}`} />
                 {errors.childName && <span className="text-[10px] text-red-400 flex items-center gap-1"><AlertCircle size={10} /> {errors.childName.message}</span>}
@@ -529,8 +529,8 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
               </div>
 
               <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-xs font-semibold text-slate-300">Punto de Encuentro o Ruta</label>
-                <input type="text" placeholder="Ej: Plaza Las Lilas, Entrada Principal"
+                <label className="text-xs font-semibold text-slate-300">Sector o comuna del paseo</label>
+                <input type="text" placeholder="Ej: Las Condes, Providencia..."
                   {...register("location")}
                   className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-base text-white placeholder-slate-600 focus:outline-none transition-colors ${errors.location ? 'border-red-500/50 focus:border-red-500' : 'border-slate-800 focus:border-emerald-500'}`} />
                 {errors.location && <span className="text-[10px] text-red-400 flex items-center gap-1"><AlertCircle size={10} /> {errors.location.message}</span>}
