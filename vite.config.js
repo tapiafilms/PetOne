@@ -22,6 +22,10 @@ export default defineConfig({
         background_color: '#020617',
         display: 'standalone',
         start_url: '/',
+        scope: '/',
+        lang: 'es',
+        id: '/',
+        categories: ['lifestyle', 'utilities'],
         icons: [
           {
             src: 'pwa-192x192.png',

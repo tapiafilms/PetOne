@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import { 
   Utensils, Copy, Check, ArrowRight, Loader2, KeyRound, X, HelpCircle, AlertCircle, Dog,
@@ -22,8 +22,8 @@ const eventSchema = z.object({
   securityAnswer: z.string().min(2, 'La respuesta debe tener al menos 2 caracteres').max(50)
 })
 
-export default function LandingPage({ onNavigateToAdmin }) {
-  const [step, setStep] = useState('home') // 'home' | 'form' | 'checkout' | 'processing' | 'success' | 'login' | 'recover'
+export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' }) {
+  const [step, setStep] = useState(initialStep) // 'home' | 'form' | 'checkout' | 'processing' | 'success' | 'login' | 'recover'
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginKey, setLoginKey] = useState('')
   const [loginError, setLoginError] = useState('')
@@ -32,6 +32,11 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const [recoverError, setRecoverError] = useState('')
   const [recoverResult, setRecoverResult] = useState(null)
   const [recoverLoading, setRecoverLoading] = useState(false)
+
+  // Reset step when initialStep changes (e.g., from mobile-welcome → landing with form)
+  useEffect(() => {
+    setStep(initialStep)
+  }, [initialStep])
 
   // React Hook Form
   const { register, handleSubmit, formState: { errors }, getValues } = useForm({
@@ -330,16 +335,16 @@ export default function LandingPage({ onNavigateToAdmin }) {
             {/* Left Content Column */}
             <div className="lg:col-span-7 flex flex-col text-left items-start animate-fade-in-up delay-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-6">
-                <Sparkles size={10} className="animate-pulse" /> La app definitiva para paseadores de perros
+                <Sparkles size={10} className="animate-pulse" /> Para paseadores de perros profesionales
               </span>
               
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6">
-                Profesionaliza tus paseos. <br className="hidden sm:inline" />
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-450 to-cyan-400 bg-clip-text text-transparent">Da tranquilidad a tus clientes.</span>
+                Tus clientes saben dónde está <br className="hidden sm:inline" />
+                <span className="bg-gradient-to-r from-emerald-400 via-teal-450 to-cyan-400 bg-clip-text text-transparent">su mascota. Siempre.</span>
               </h1>
               
               <p className="text-sm md:text-base text-slate-400 mb-8 max-w-lg leading-relaxed">
-                Comparte la ruta GPS en vivo, gestiona fichas médicas en el camino y notifica entregas seguras de forma automática. Menos mensajes manuales de WhatsApp, mayor confianza y profesionalismo en tu servicio.
+                Ruta GPS en vivo, fichas médicas y notificaciones automáticas. Tu servicio, más profesional. Sus mascotas, más seguras.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-4">
@@ -347,7 +352,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                   onClick={() => setStep('form')} 
                   className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm px-8 py-4 rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] w-full sm:w-auto text-center flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Crear Sesión de Paseo</span>
+                  <span>Comenzar Ahora</span>
                   <ArrowRight size={16} />
                 </button>
                 <button 
@@ -355,7 +360,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                   className="bg-slate-900/60 hover:bg-slate-800 text-slate-300 font-bold text-sm px-6 py-4 rounded-xl border border-slate-800 transition-all active:scale-[0.98] w-full sm:w-auto text-center flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <KeyRound size={14} className="text-slate-400" />
-                  <span>Entrar con clave</span>
+                  <span>Ya tengo cuenta</span>
                 </button>
               </div>
             </div>
@@ -405,24 +410,24 @@ export default function LandingPage({ onNavigateToAdmin }) {
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit mb-4 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
                 <MapPin size={18} />
               </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">Seguimiento Transparente</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">Comparte un enlace de rastreo en vivo único con los dueños sin obligarlos a descargar apps.</p>
+              <h3 className="font-bold text-sm text-white mb-1.5">Ruta GPS en Vivo</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Tus clientes ven cada paso en tiempo real. Sin mensajes de WhatsApp, sin llamadas. Solo tranquilidad.</p>
             </div>
             
             <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
               <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 w-fit mb-4 group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors">
                 <Utensils size={18} />
               </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">Gestión de Manada</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">Lleva en tu celular las alertas de salud, alergias, comportamiento e indicaciones de entrega de cada mascota.</p>
+              <h3 className="font-bold text-sm text-white mb-1.5">Fichas Médicas</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Alergias, medicamentos y cuidados al alcance de tu mano durante el paseo.</p>
             </div>
             
             <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
               <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 w-fit mb-4 group-hover:bg-teal-500 group-hover:text-slate-950 transition-colors">
                 <ShieldCheck size={18} />
               </div>
-              <h3 className="font-bold text-sm text-white mb-1.5">Check-out Automatizado</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">Marca la entrega de cada perro y envía una notificación push inmediata de regreso seguro a casa.</p>
+              <h3 className="font-bold text-sm text-white mb-1.5">Check-out Automático</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">Notificación push instantánea cuando su mascota está de vuelta en casa.</p>
             </div>
           </div>
 
@@ -447,8 +452,8 @@ export default function LandingPage({ onNavigateToAdmin }) {
           </button>
 
           <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8">
-            <h2 className="text-xl font-extrabold text-white mb-1">Comienza a organizar</h2>
-            <p className="text-xs text-slate-400 mb-6">Configura en minutos e invita a los tutores de las mascotas.</p>
+            <h2 className="text-xl font-extrabold text-white mb-1">Crea tu paseo en minutos</h2>
+            <p className="text-xs text-slate-400 mb-6">Configura los datos del paseo e invita a los tutores.</p>
 
             <form onSubmit={handleSubmit(handleValidFormSubmit)} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5 text-left">
@@ -509,7 +514,7 @@ export default function LandingPage({ onNavigateToAdmin }) {
                 <button type="button"
                   onClick={() => setShowLoginModal(true)}
                   className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] border border-slate-700">
-                  <KeyRound size={14} /> Entrar con Clave
+                  <KeyRound size={14} /> Ya tengo cuenta
                 </button>
               </div>
             </form>

@@ -10,14 +10,16 @@ const RsvpPage = lazy(() => import('./pages/RsvpPage'))
 const HostAdmin = lazy(() => import('./pages/HostAdmin'))
 const EventBoard = lazy(() => import('./pages/EventBoard'))
 const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'))
+const MobileWelcome = lazy(() => import('./pages/MobileWelcome'))
 
 const isMobileDevice = () => window.matchMedia('(max-width: 768px)').matches
 
 export default function App() {
-  const [route, setRoute] = useState('loading') // 'loading' | 'landing' | 'rsvp' | 'admin' | 'board' | '404'
+  const [route, setRoute] = useState('loading') // 'loading' | 'landing' | 'rsvp' | 'admin' | 'board' | 'comingsoon' | 'mobile-welcome' | '404'
   const [resolvedParams, setResolvedParams] = useState({})
   const [loading, setLoading] = useState(true)
   const [showSplash, setShowSplash] = useState(false)
+  const [landingStep, setLandingStep] = useState('home') // 'home' | 'form'
 
   // Obtener parámetros de la URL
   const params = new URLSearchParams(window.location.search)
@@ -38,7 +40,13 @@ export default function App() {
       } else {
         const urlParams = new URLSearchParams(window.location.search)
         const isPreview = urlParams.get('preview') === 'true' || urlParams.get('setup') === 'true'
-        setRoute(isPreview ? 'landing' : 'comingsoon')
+        if (isPreview) {
+          setRoute('landing')
+        } else if (isMobileDevice()) {
+          setRoute('mobile-welcome')
+        } else {
+          setRoute('comingsoon')
+        }
       }
       setLoading(false)
       return
@@ -195,8 +203,19 @@ export default function App() {
     setShowSplash(false)
     const urlParams = new URLSearchParams(window.location.search)
     const isPreview = urlParams.get('preview') === 'true' || urlParams.get('setup') === 'true'
-    setRoute(isPreview ? 'landing' : 'comingsoon')
+    if (isPreview) {
+      setRoute('landing')
+    } else if (isMobileDevice()) {
+      setRoute('mobile-welcome')
+    } else {
+      setRoute('comingsoon')
+    }
   }, [])
+
+  const handleStartCreate = () => {
+    setLandingStep('form')
+    setRoute('landing')
+  }
 
   if (loading || route === 'loading') {
     if (showSplash) {
@@ -223,8 +242,15 @@ export default function App() {
           <ComingSoonPage />
         )}
 
+        {route === 'mobile-welcome' && (
+          <MobileWelcome
+            onNavigateToAdmin={handleNavigateToAdmin}
+            onStartCreate={handleStartCreate}
+          />
+        )}
+
         {route === 'landing' && (
-          <LandingPage onNavigateToAdmin={handleNavigateToAdmin} />
+          <LandingPage onNavigateToAdmin={handleNavigateToAdmin} initialStep={landingStep} />
         )}
 
         {route === 'rsvp' && (
