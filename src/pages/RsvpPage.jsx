@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useEventData } from '../hooks/useEventData'
 import RsvpForm from '../components/RsvpForm'
 import { Loader2 } from 'lucide-react'
@@ -8,6 +8,13 @@ export default function RsvpPage({ eventId, guestToken, onRegisterComplete }) {
   const [success, setSuccess] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [registeredGuest, setRegisteredGuest] = useState(null)
+
+  // Guardar guest_token en localStorage al cargar para uso futuro
+  useEffect(() => {
+    if (guestToken && eventId) {
+      localStorage.setItem(`petone_guest_token_${eventId}`, guestToken)
+    }
+  }, [guestToken, eventId])
 
   const handleRegisterSuccess = async (guestData) => {
     setSubmitting(true)

@@ -12,7 +12,9 @@ import {
 } from 'lucide-react'
 
 export default function EventBoard({ eventId, guestToken, personalToken }) {
-  const { event, currentGuest, media, loading, error, refresh, updateGuest } = useEventData(eventId, guestToken, personalToken)
+  // Fallback: si guestToken no se pasó como prop, buscarlo en localStorage
+  const effectiveGuestToken = guestToken || localStorage.getItem(`petone_guest_token_${eventId}`) || null
+  const { event, currentGuest, media, loading, error, refresh, updateGuest } = useEventData(eventId, effectiveGuestToken, personalToken)
   const { isSubscribed, loading: pushLoading, subscribe, unsubscribe } = usePushSubscription(currentGuest, updateGuest)
 
   // Estados locales para edición de autorizados y alergias
