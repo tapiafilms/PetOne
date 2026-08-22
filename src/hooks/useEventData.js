@@ -384,7 +384,7 @@ export function useEventData(eventId, eventToken, personalToken = null) {
         supabaseClient.removeChannel(mediaChannel)
       }
     }
-  }, [eventId, fetchLocalData, fetchCloudData, supabaseClient, personalToken, currentGuest])
+  }, [eventId, fetchLocalData, fetchCloudData, supabaseClient, personalToken])
 
   const finishCloudEvent = useCallback(async () => {
     if (!eventId || !supabaseClient) return
