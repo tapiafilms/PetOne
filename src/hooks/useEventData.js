@@ -16,15 +16,10 @@ export function useEventData(eventId, eventToken, personalToken = null) {
 
   const clientRef = useRef(null)
 
-  if (isSupabaseConfigured && (!clientRef.current || clientRef.current.eventToken !== eventToken || clientRef.current.personalToken !== personalToken)) {
-    clientRef.current = {
-      client: getSupabaseClient(eventToken, personalToken),
-      eventToken,
-      personalToken
-    }
-  }
-
-  const supabaseClient = clientRef.current?.client
+  // Siempre recrear el cliente cuando cambien los tokens (resuelve race condition con localStorage)
+  const supabaseClient = isSupabaseConfigured
+    ? getSupabaseClient(eventToken, personalToken)
+    : null
 
   // --- MOCK LOCALSTORAGE LOGIC (LOCAL DEMO MODE) ---
   const fetchLocalData = useCallback(async () => {
