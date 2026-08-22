@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS events (
   event_date TIMESTAMPTZ NOT NULL, -- Fecha y hora del paseo
   location TEXT NOT NULL, -- Punto de encuentro / Ruta
   host_email TEXT NOT NULL, -- Email del paseador (Admin)
+  host_photo TEXT, -- URL de la foto del paseador (opcional)
   host_token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'), -- Acceso paseador
   guest_token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'), -- Acceso público para invitar dueños
   payment_status TEXT NOT NULL DEFAULT 'paid',

@@ -349,11 +349,22 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
 
       {/* Header */}
       <div className="max-w-xl mx-auto px-4 pt-6 text-left">
-        <span className="text-[10px] text-emerald-400 font-extrabold uppercase tracking-widest">Paseo de tu mascota con</span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
-          {event.child_name} 🦮
-        </h1>
-        <p className="text-xs text-slate-400 mt-1">
+        <div className="flex items-center gap-3 mb-1">
+          {event.host_photo ? (
+            <img src={event.host_photo} alt={event.child_name} className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500/30" />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-lg">
+              🧑
+            </div>
+          )}
+          <div>
+            <span className="text-[10px] text-emerald-400 font-extrabold uppercase tracking-widest">Paseo de tu mascota con</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+              {event.child_name}
+            </h1>
+          </div>
+        </div>
+        <p className="text-xs text-slate-400 mt-1 ml-15">
           📅 {formattedEventDate}
         </p>
       </div>

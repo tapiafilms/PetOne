@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import { 
   Utensils, Copy, Check, ArrowRight, Loader2, KeyRound, X, HelpCircle, AlertCircle, Dog,
-  MapPin, ShieldCheck, Sparkles, ClipboardList, Send, Radio
+  MapPin, ShieldCheck, Sparkles, ClipboardList, Send, Radio, Camera
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -53,8 +53,47 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
 
   const [createdEvent, setCreatedEvent] = useState(null)
   const [copiedLink, setCopiedLink] = useState('')
+  const [hostPhoto, setHostPhoto] = useState(null)
+  const [hostPhotoPreview, setHostPhotoPreview] = useState(null)
 
   const [preferenceId, setPreferenceId] = useState(null)
+
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onloadend = () => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const maxSize = 800
+          let { width, height } = img
+          if (width > maxSize || height > maxSize) {
+            if (width > height) {
+              height = Math.round((height * maxSize) / width)
+              width = maxSize
+            } else {
+              width = Math.round((width * maxSize) / height)
+              height = maxSize
+            }
+          }
+          canvas.width = width
+          canvas.height = height
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+          canvas.toBlob((blob) => resolve(blob), 'image/webp', 0.8)
+        }
+        img.src = reader.result
+      }
+    })
+  }
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setHostPhoto(file)
+      setHostPhotoPreview(URL.createObjectURL(file))
+    }
+  }
 
   const handleValidFormSubmit = async () => {
     setStep('processing')
@@ -98,6 +137,16 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
       await new Promise(resolve => setTimeout(resolve, 1500))
 
       if (!isSupabaseConfigured) {
+        // Modo local: comprimir y guardar foto como DataURL si existe
+        let hostPhotoDataUrl = null
+        if (hostPhoto) {
+          const compressed = await compressImage(hostPhoto)
+          hostPhotoDataUrl = await new Promise((resolve) => {
+            const reader = new FileReader()
+            reader.readAsDataURL(compressed)
+            reader.onloadend = () => resolve(reader.result)
+          })
+        }
         const mockId = `mock-event-${Date.now()}`
         const mockEventData = {
           id: mockId,
@@ -105,6 +154,7 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
           event_date: eventDateTime.toISOString(),
           location: formData.location,
           host_email: formData.hostEmail,
+          host_photo: hostPhotoDataUrl,
           host_token: `mock-host-${Math.random().toString(36).substring(7)}`,
           guest_token: `mock-guest-${Math.random().toString(36).substring(7)}`,
           security_answer: formData.securityAnswer.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
@@ -129,6 +179,21 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
       const guestToken = generateHexToken()
 
       const clientWithToken = getSupabaseClient(hostToken)
+
+      // Subir foto del paseador si existe
+      let hostPhotoUrl = null
+      if (hostPhoto) {
+        const compressed = await compressImage(hostPhoto)
+        const photoPath = `host-profiles/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.webp`
+        const { error: uploadErr } = await clientWithToken.storage
+          .from('photos')
+          .upload(photoPath, compressed, { cacheControl: '31536000', upsert: false })
+        if (!uploadErr) {
+          const { data: urlData } = clientWithToken.storage.from('photos').getPublicUrl(photoPath)
+          hostPhotoUrl = urlData.publicUrl
+        }
+      }
+
       const { data, error } = await clientWithToken
         .from('events')
         .insert({
@@ -136,6 +201,7 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
           event_date: eventDateTime.toISOString(),
           location: formData.location,
           host_email: formData.hostEmail,
+          host_photo: hostPhotoUrl,
           security_answer: formData.securityAnswer.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
           payment_status: 'paid',
           timeline: defaultTimeline,
@@ -551,6 +617,38 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
                   {...register("securityAnswer")}
                   className={`w-full bg-slate-950 border rounded-xl px-4 py-3 text-base text-white placeholder-slate-600 focus:outline-none transition-colors ${errors.securityAnswer ? 'border-red-500/50 focus:border-red-500' : 'border-slate-800 focus:border-emerald-500'}`} />
                 {errors.securityAnswer && <span className="text-[10px] text-red-400 flex items-center gap-1"><AlertCircle size={10} /> {errors.securityAnswer.message}</span>}
+              </div>
+
+              {/* Foto del paseador */}
+              <div className="flex flex-col gap-1.5 text-left">
+                <label className="text-xs font-semibold text-slate-300">Tu foto (opcional)</label>
+                <p className="text-[10px] text-slate-500 -mt-1">Para que los dueños te reconozcan.</p>
+                <div className="flex items-center gap-4">
+                  <label className="relative cursor-pointer group">
+                    <div className={`w-20 h-20 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-colors ${hostPhotoPreview ? 'border-emerald-500/50' : 'border-slate-700 group-hover:border-slate-600'}`}>
+                      {hostPhotoPreview ? (
+                        <img src={hostPhotoPreview} alt="Tu foto" className="w-full h-full object-cover" />
+                      ) : (
+                        <Camera size={20} className="text-slate-500" />
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePhotoChange}
+                    />
+                  </label>
+                  {hostPhotoPreview && (
+                    <button
+                      type="button"
+                      onClick={() => { setHostPhoto(null); setHostPhotoPreview(null) }}
+                      className="text-xs text-slate-500 hover:text-red-400 transition-colors"
+                    >
+                      Quitar foto
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="mt-2 flex flex-col sm:flex-row gap-3">
