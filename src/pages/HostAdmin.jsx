@@ -51,7 +51,8 @@ export default function HostAdmin({ eventId, hostToken }) {
   const updateCoords = useCallback(async (coords) => {
     try {
       if (isSupabaseConfigured) {
-        await supabase
+        const authedClient = getSupabaseClient(hostToken)
+        await authedClient
           .from('events')
           .update({ location_coords: coords })
           .eq('id', eventId)
