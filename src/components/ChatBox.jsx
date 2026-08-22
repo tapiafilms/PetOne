@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { isSupabaseConfigured, getSupabaseClient } from '../lib/supabaseClient'
 import { Send, MessageCircle, X } from 'lucide-react'
 
-export default function ChatBox({ eventId, senderName, senderRole, guestId = null, filterGuestId = null, isOpen, onClose, chatTitle = 'Chat' }) {
+export default function ChatBox({ eventId, eventToken = null, personalToken = null, senderName, senderRole, guestId = null, filterGuestId = null, isOpen, onClose, chatTitle = 'Chat' }) {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef(null)
   const channelRef = useRef(null)
+
+  const client = isSupabaseConfigured
+    ? getSupabaseClient(eventToken, personalToken)
+    : null
 
   // Marcar como leído al abrir el chat, o cuando lleguen mensajes nuevos y esté abierto
   useEffect(() => {
@@ -19,8 +23,8 @@ export default function ChatBox({ eventId, senderName, senderRole, guestId = nul
 
       const now = new Date().toISOString()
 
-      if (isSupabaseConfigured) {
-        await supabase
+      if (isSupabaseConfigured && client) {
+        await client
           .from('chat_read_status')
           .upsert({
             event_id: eventId,
@@ -36,7 +40,7 @@ export default function ChatBox({ eventId, senderName, senderRole, guestId = nul
     }
 
     markAsRead()
-  }, [eventId, isOpen, filterGuestId, guestId, messages.length])
+  }, [eventId, isOpen, filterGuestId, guestId, messages.length, client])
 
   // Cargar mensajes + suscribirse a tiempo real (filtrado por guest_id)
   useEffect(() => {
@@ -45,9 +49,9 @@ export default function ChatBox({ eventId, senderName, senderRole, guestId = nul
     // Resetear mensajes al abrir un chat diferente
     setMessages([])
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && client) {
       const fetchMessages = async () => {
-        let query = supabase
+        let query = client
           .from('messages')
           .select('*')
           .eq('event_id', eventId)
@@ -67,7 +71,7 @@ export default function ChatBox({ eventId, senderName, senderRole, guestId = nul
 
       // Suscribirse a nuevos mensajes
       const channelName = filterGuestId ? `chat-${eventId}-${filterGuestId}` : `chat-${eventId}`
-      const channel = supabase
+      const channel = client
         .channel(channelName)
         .on(
           'postgres_changes',
@@ -87,7 +91,7 @@ export default function ChatBox({ eventId, senderName, senderRole, guestId = nul
 
       return () => {
         if (channelRef.current) {
-          supabase.removeChannel(channelRef.current)
+          client.removeChannel(channelRef.current)
         }
       }
     } else {
@@ -111,7 +115,7 @@ export default function ChatBox({ eventId, senderName, senderRole, guestId = nul
 
       return () => clearInterval(interval)
     }
-  }, [eventId, isOpen, filterGuestId])
+  }, [eventId, isOpen, filterGuestId, client])
 
   // Auto-scroll al último mensaje
   useEffect(() => {
@@ -136,8 +140,8 @@ export default function ChatBox({ eventId, senderName, senderRole, guestId = nul
     setNewMessage('')
 
     try {
-      if (isSupabaseConfigured) {
-        const { error } = await supabase.from('messages').insert(message)
+      if (isSupabaseConfigured && client) {
+        const { error } = await client.from('messages').insert(message)
         if (error) throw error
       } else {
         const newMsg = {

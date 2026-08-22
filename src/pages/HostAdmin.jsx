@@ -15,7 +15,7 @@ import {
   AlertTriangle, Calendar, MapPin, Copy, Check, 
   UserMinus, RefreshCw,
   Camera, Video, Loader2, Play, Download, X,
-  Home, Users, Clock, Truck, MessageCircle, Image as ImageIcon, Car, Compass, Dog
+  Home, Users, Clock, Truck, MessageCircle, Image as ImageIcon, Car, Compass
 } from 'lucide-react'
 
 export default function HostAdmin({ eventId, hostToken }) {
@@ -68,7 +68,7 @@ export default function HostAdmin({ eventId, hostToken }) {
     } catch (err) {
       console.error('Error updating location coords:', err)
     }
-  }, [eventId])
+  }, [eventId, hostToken])
 
   // Geolocalización GPS real
   useEffect(() => {
@@ -413,7 +413,7 @@ export default function HostAdmin({ eventId, hostToken }) {
     try {
       const JSZip = (await import('jszip')).default
       const zip = new JSZip()
-      const folder = zip.folder(`${event?.child_name || 'cumpleanos'}-fotos`)
+      const folder = zip.folder(`${event?.child_name || 'paseo'}-fotos`)
 
       let downloaded = 0
       let failed = 0
@@ -446,7 +446,7 @@ export default function HostAdmin({ eventId, hostToken }) {
       const blobUrl = window.URL.createObjectURL(content)
       const link = document.createElement('a')
       link.href = blobUrl
-      link.download = `${event?.child_name || 'cumpleanos'}-fotos.zip`
+      link.download = `${event?.child_name || 'paseo'}-fotos.zip`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -468,7 +468,7 @@ export default function HostAdmin({ eventId, hostToken }) {
 
   const handleFinishEvent = async () => {
     const confirmFinish = confirm(
-      '¿Seguro que deseas dar por terminada la fiesta?\n\nEsto programará el borrado automático de todas las fotos y videos en 12 horas. Asegúrate de descargar el álbum ZIP antes de que expire.'
+      '¿Seguro que deseas dar por terminado el paseo?\n\nEsto programará el borrado automático de todas las fotos y videos en 12 horas. Asegúrate de descargar el álbum ZIP antes de que expire.'
     )
     if (!confirmFinish) return
 
@@ -786,7 +786,7 @@ export default function HostAdmin({ eventId, hostToken }) {
 
               {media.length === 0 ? (
                 <div className="py-8 px-6 text-center text-slate-500 text-xs italic">
-                  No hay fotos ni videos publicados en esta fiesta todavía. ¡Toma la primera captura!
+                  No hay fotos ni videos publicados en este paseo todavía. ¡Toma la primera captura!
                 </div>
               ) : (
                 <PhotoCardStack
@@ -834,10 +834,10 @@ export default function HostAdmin({ eventId, hostToken }) {
               <div className="bg-amber-950/20 border border-amber-800/60 rounded-3xl p-6 text-left flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div className="flex-1">
                   <span className="text-xs text-amber-400 font-extrabold uppercase tracking-wider block mb-1">
-                    ⚠️ Fiesta Finalizada y Programada para Eliminación
+                    ⚠️ Paseo Finalizado y Programado para Eliminación
                   </span>
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    Esta fiesta ha terminado. Las fotos y videos se eliminarán permanentemente el{' '}
+                    Este paseo ha terminado. Las fotos y videos se eliminarán permanentemente el{' '}
                     <strong>{new Date(event.expires_at).toLocaleString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</strong>.
                   </p>
                 </div>
@@ -871,7 +871,7 @@ export default function HostAdmin({ eventId, hostToken }) {
                     onClick={handleFinishEvent}
                     className="flex-1 md:flex-none bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer shadow-lg shadow-red-600/10"
                   >
-                    Terminar Fiesta
+                    Terminar Paseo
                   </button>
                 </div>
               </div>
@@ -926,7 +926,7 @@ export default function HostAdmin({ eventId, hostToken }) {
         <div className="max-w-2xl mx-auto px-6 pt-8 pb-6">
           <h1 className="text-3xl font-extrabold text-white mb-6">Servicios Recomendados</h1>
           <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 text-left">
-            <ProviderDirectory eventName={event.child_name} />
+            <ProviderDirectory />
           </div>
         </div>
       )}
@@ -1011,8 +1011,8 @@ export default function HostAdmin({ eventId, hostToken }) {
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md flex flex-col gap-5 text-left max-h-[90vh] overflow-y-auto safe-area-top safe-area-bottom">
           <div>
-            <h3 className="text-lg font-extrabold text-white">Etiquetar Niños</h3>
-            <p className="text-xs text-slate-400 mt-1">Selecciona los niños que aparecen en la captura para que se publique en su feed privado.</p>
+            <h3 className="text-lg font-extrabold text-white">Etiquetar Mascotas</h3>
+            <p className="text-xs text-slate-400 mt-1">Selecciona las mascotas que aparecen en la captura para que se publique en su feed privado.</p>
           </div>
           <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-850 bg-slate-950 flex items-center justify-center">
             {pendingMedia.type === 'photo' ? (
@@ -1120,6 +1120,7 @@ export default function HostAdmin({ eventId, hostToken }) {
     {/* Chat privado */}
     <ChatList
       eventId={eventId}
+      hostToken={hostToken}
       guests={guests}
       isOpen={showChat && !selectedGuest}
       onSelectGuest={(guest) => setSelectedGuest(guest)}
@@ -1130,6 +1131,7 @@ export default function HostAdmin({ eventId, hostToken }) {
     {selectedGuest && (
       <ChatBox
         eventId={eventId}
+        eventToken={hostToken}
         senderName="Anfitrión"
         senderRole="admin"
         filterGuestId={selectedGuest.id}

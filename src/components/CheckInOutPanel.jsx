@@ -3,13 +3,12 @@ import { Search, ShieldCheck, LogOut, Check, Copy, Send } from 'lucide-react'
 import { generateWhatsAppLink } from '../lib/waLink'
 
 /**
- * Panel dedicado al control de Check-In/Out en la puerta del evento.
- * @param {Array} guests - Lista completa de invitados
- * @param {Function} onCheckoutToggle - Función para alternar el retiro de un niño
- * @param {string} eventId - ID del evento
- * @param {string} birthdayKidName - Nombre del festejado
+ * Panel dedicado al control de Check-In/Out del paseo.
+ * @param {Array} guests - Lista completa de invitados (mascotas)
+ * @param {Function} onCheckoutToggle - Función para alternar el retiro/entrega de una mascota
+ * @param {string} eventId - ID del paseo
  */
-export default function CheckInOutPanel({ guests = [], onCheckoutToggle, eventId, birthdayKidName }) {
+export default function CheckInOutPanel({ guests = [], onCheckoutToggle, eventId }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all') // 'all' | 'inside' | 'outside'
   const [copiedId, setCopiedId] = useState('')
@@ -137,7 +136,7 @@ export default function CheckInOutPanel({ guests = [], onCheckoutToggle, eventId
                     : 'border-slate-850 bg-slate-950/40 hover:border-slate-800'
                 }`}
               >
-                {/* Detalles del Niño */}
+                {/* Detalles de la Mascota */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h4 className={`font-bold text-sm sm:text-base ${isCheckedOut ? 'text-slate-500 line-through' : 'text-white'}`}>

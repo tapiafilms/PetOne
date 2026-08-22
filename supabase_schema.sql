@@ -234,4 +234,150 @@ INSERT INTO providers (name, category, zone, phone, photo_url, price_range, note
 ('Veterinaria PetOne Central', 'veterinario', 'Providencia / Las Condes', '+56911112222', null, '$$$', 'Urgencias 24/7 y consultas de especialidades con descuento.'),
 ('Peluquería Móvil DoggyGroom', 'tienda', 'Santiago Oriente', '+56933334444', null, '$$', 'Servicio de peluquería e higiene canina directo en tu domicilio.'),
 ('Entrenador Canino AlfaDog', 'entrenador', 'Ñuñoa / La Reina', '+56955556666', null, '$$$', 'Especialista en sociabilización y control de reactividad con refuerzo positivo.'),
-('Tienda PetOne Express', 'tienda', 'Toda la RM', '+56977778888', null, '$$', 'Despacho express de alimento premium y juguetes interactivos.');
+('Tienda PetOne Express', 'tienda', 'Toda la RM', '+56977778888', null, '$$', 'Despacho express de alimento premium y juguetes interactivos.')
+ON CONFLICT DO NOTHING;
+
+
+-- ====================================================
+-- 5. TABLA: messages (Mensajes del chat en tiempo real)
+-- ====================================================
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  guest_id UUID REFERENCES guests(id) ON DELETE CASCADE,
+  sender_name TEXT NOT NULL,
+  sender_role TEXT NOT NULL, -- 'admin' | 'guest'
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Permitir lectura de mensajes por paseador o dueño" ON messages
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = messages.event_id 
+      AND (
+        events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+        OR (
+          events.guest_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+          AND EXISTS (
+            SELECT 1 FROM guests
+            WHERE guests.id = messages.guest_id
+            AND guests.personal_token = coalesce(current_setting('request.headers', true)::json->>'x-guest-token', '')
+          )
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Permitir inserción de mensajes por paseador o dueño" ON messages
+  FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = messages.event_id 
+      AND (
+        events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+        OR (
+          events.guest_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+          AND EXISTS (
+            SELECT 1 FROM guests
+            WHERE guests.id = messages.guest_id
+            AND guests.personal_token = coalesce(current_setting('request.headers', true)::json->>'x-guest-token', '')
+          )
+        )
+      )
+    )
+  );
+
+
+-- ====================================================
+-- 6. TABLA: chat_read_status (Control de mensajes leídos)
+-- ====================================================
+CREATE TABLE IF NOT EXISTS chat_read_status (
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  guest_id UUID REFERENCES guests(id) ON DELETE CASCADE,
+  last_read_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (event_id, guest_id)
+);
+
+ALTER TABLE chat_read_status ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Permitir lectura de read status por paseador o dueño" ON chat_read_status
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = chat_read_status.event_id 
+      AND (
+        events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+        OR (
+          events.guest_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+          AND EXISTS (
+            SELECT 1 FROM guests
+            WHERE guests.id = chat_read_status.guest_id
+            AND guests.personal_token = coalesce(current_setting('request.headers', true)::json->>'x-guest-token', '')
+          )
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Permitir upsert de read status por paseador o dueño" ON chat_read_status
+  FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = chat_read_status.event_id 
+      AND (
+        events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+        OR (
+          events.guest_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+          AND EXISTS (
+            SELECT 1 FROM guests
+            WHERE guests.id = chat_read_status.guest_id
+            AND guests.personal_token = coalesce(current_setting('request.headers', true)::json->>'x-guest-token', '')
+          )
+        )
+      )
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = chat_read_status.event_id 
+      AND (
+        events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+        OR (
+          events.guest_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+          AND EXISTS (
+            SELECT 1 FROM guests
+            WHERE guests.id = chat_read_status.guest_id
+            AND guests.personal_token = coalesce(current_setting('request.headers', true)::json->>'x-guest-token', '')
+          )
+        )
+      )
+    )
+  );
+
+
+-- ====================================================
+-- RPC: recover_host_token (Recuperación segura de clave)
+-- ====================================================
+CREATE OR REPLACE FUNCTION recover_host_token(p_email TEXT, p_security_answer TEXT)
+RETURNS TABLE (host_token TEXT, child_name TEXT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT events.host_token, events.child_name
+  FROM events
+  WHERE LOWER(events.host_email) = LOWER(p_email)
+  AND LOWER(events.security_answer) = LOWER(p_security_answer);
+END;
+$$;
+

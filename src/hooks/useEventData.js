@@ -14,7 +14,10 @@ export function useEventData(eventId, eventToken, personalToken = null) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const clientRef = useRef(null)
+  const currentGuestRef = useRef(null)
+  useEffect(() => {
+    currentGuestRef.current = currentGuest
+  }, [currentGuest])
 
   // Siempre recrear el cliente cuando cambien los tokens (resuelve race condition con localStorage)
   const supabaseClient = isSupabaseConfigured
@@ -345,7 +348,7 @@ export function useEventData(eventId, eventToken, personalToken = null) {
               }
             } else if (payload.eventType === 'DELETE') {
               setGuests(prev => prev.filter(g => g.id !== payload.old.id))
-              if (currentGuest && currentGuest.id === payload.old.id) {
+              if (currentGuestRef.current && currentGuestRef.current.id === payload.old.id) {
                 setCurrentGuest(null)
               }
             }

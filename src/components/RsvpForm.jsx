@@ -11,12 +11,12 @@ export default function RsvpForm({ event, onRegisterSuccess }) {
   const [parentPhone, setParentPhone] = useState('')
   const [parentEmail, setParentEmail] = useState('')
   
-  // Alergias
+  // Sensibilidades alimentarias de mascotas
   const [commonAllergies, setCommonAllergies] = useState({
-    Gluten: false,
-    Lactosa: false,
-    Maní: false,
-    Huevo: false
+    Pollo: false,
+    Granos: false,
+    Lácteos: false,
+    Vacuno: false
   })
   const [otherAllergies, setOtherAllergies] = useState('')
   
@@ -97,7 +97,7 @@ export default function RsvpForm({ event, onRegisterSuccess }) {
           ¡Invitación al Paseo!
         </div>
 
-        {/* Info del Cumpleaños */}
+        {/* Info del Paseo */}
         <div className="mb-8 mt-2 text-center sm:text-left">
           <span className="text-xs font-semibold text-emerald-400 uppercase tracking-widest">Sesión de Paseo de</span>
           <h2 className="text-3xl font-extrabold text-white mt-1 bg-gradient-to-r from-white via-emerald-200 to-emerald-400 bg-clip-text text-transparent">

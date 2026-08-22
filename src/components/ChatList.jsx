@@ -1,19 +1,23 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { isSupabaseConfigured, getSupabaseClient } from '../lib/supabaseClient'
 import { MessageCircle, X, ChevronRight } from 'lucide-react'
 
-export default function ChatList({ eventId, guests, isOpen, onSelectGuest, onClose, onUnreadChange }) {
+export default function ChatList({ eventId, hostToken = null, guests, isOpen, onSelectGuest, onClose, onUnreadChange }) {
   const [lastMessages, setLastMessages] = useState({})
   const [readStatuses, setReadStatuses] = useState({})
   const [dataLoaded, setDataLoaded] = useState(false)
+
+  const client = isSupabaseConfigured
+    ? getSupabaseClient(hostToken, null)
+    : null
 
   // Cargar mensajes + read status
   const fetchData = useCallback(async () => {
     if (!eventId) return
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && client) {
       // Mensajes
-      const { data: msgs } = await supabase
+      const { data: msgs } = await client
         .from('messages')
         .select('*')
         .eq('event_id', eventId)
@@ -31,7 +35,7 @@ export default function ChatList({ eventId, guests, isOpen, onSelectGuest, onClo
       }
 
       // Read status
-      const { data: reads } = await supabase
+      const { data: reads } = await client
         .from('chat_read_status')
         .select('guest_id, last_read_at')
         .eq('event_id', eventId)
@@ -61,7 +65,7 @@ export default function ChatList({ eventId, guests, isOpen, onSelectGuest, onClo
       }
     }
     setDataLoaded(true)
-  }, [eventId])
+  }, [eventId, client])
 
   useEffect(() => {
     if (!isOpen) {
@@ -96,8 +100,8 @@ export default function ChatList({ eventId, guests, isOpen, onSelectGuest, onClo
   const handleSelectGuest = async (guest) => {
     const now = new Date().toISOString()
 
-    if (isSupabaseConfigured) {
-      await supabase
+    if (isSupabaseConfigured && client) {
+      await client
         .from('chat_read_status')
         .upsert({
           event_id: eventId,

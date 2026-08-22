@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     }
 
     webpush.setVapidDetails(
-      'mailto:soporte@cumpland.cl',
+      'mailto:soporte@petone.cl',
       vapidPublicKey,
       vapidPrivateKey
     )
@@ -76,8 +76,8 @@ export default async function handler(req, res) {
     // 5. Preparar payload y enviar
     const origin = req.headers.origin || `https://${req.headers.host}`
     const payload = JSON.stringify({
-      title: '¡Retiro Realizado! 🚗',
-      body: `${guest.child_guest_name} ha sido retirado con éxito del cumpleaños de ${event.child_name}.`,
+      title: '¡Mascota Entregada! 🐾',
+      body: `${guest.child_guest_name} ha sido entregado/a con éxito de su paseo por su paseador/a ${event.child_name}.`,
       url: `${origin}/?e=${eventId}`
     })
 

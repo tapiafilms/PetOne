@@ -59,7 +59,7 @@ export default function PhotoGallery({ media = [] }) {
           <div>
             <span className="text-xs font-bold text-slate-400 block">Álbum de fotos vacío</span>
             <p className="text-[10px] text-slate-500 mt-1 max-w-[200px] mx-auto leading-relaxed">
-              Las fotos de la fiesta aparecerán aquí.
+              Las fotos del paseo aparecerán aquí.
             </p>
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function PhotoGallery({ media = [] }) {
               {item.media_type === 'photo' ? (
                 <img 
                   src={item.url} 
-                  alt="Cumpleaños" 
+                  alt="Foto de paseo" 
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (

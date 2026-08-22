@@ -123,7 +123,7 @@ export default function MobileWelcome({ onNavigateToAdmin, onStartCreate }) {
                 value={loginKey}
                 onChange={(e) => { setLoginKey(e.target.value); setLoginError('') }}
                 placeholder="Pega tu clave aquí"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base text-white placeholder-slate-600 focus:outline-none focus:border-pink-500 transition-colors text-center font-mono"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors text-center font-mono"
                 autoFocus
               />
               {loginError && (
@@ -132,7 +132,7 @@ export default function MobileWelcome({ onNavigateToAdmin, onStartCreate }) {
               <button
                 onClick={handleLoginWithKey}
                 disabled={!loginKey.trim()}
-                className="w-full bg-gradient-to-r from-pink-600 to-fuchsia-600 hover:from-pink-500 hover:to-fuchsia-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold text-sm py-3 rounded-xl transition-all active:scale-[0.97]"
+                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-slate-850 disabled:to-slate-850 disabled:text-slate-500 text-white font-bold text-sm py-3.5 rounded-xl transition-all active:scale-[0.97] cursor-pointer shadow-lg shadow-emerald-600/10"
               >
                 Ingresar
               </button>

@@ -647,6 +647,8 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
 
         <ChatBox
           eventId={eventId}
+          eventToken={effectiveGuestToken}
+          personalToken={personalToken}
           senderName={currentGuest.child_guest_name || currentGuest.parent_name || 'Tutor'}
           senderRole="guest"
           guestId={currentGuest.id}

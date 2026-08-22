@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import { 
-  Utensils, Copy, Check, ArrowRight, Loader2, KeyRound, X, HelpCircle, AlertCircle, Dog,
+  Copy, Check, ArrowRight, Loader2, KeyRound, X, HelpCircle, AlertCircle, Dog,
   MapPin, ShieldCheck, Sparkles, ClipboardList, Send, Radio, Camera
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -28,6 +28,7 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
   const [loginKey, setLoginKey] = useState('')
   const [loginError, setLoginError] = useState('')
   const [showRecoverModal, setShowRecoverModal] = useState(false)
+  const [recoverEmail, setRecoverEmail] = useState('')
   const [recoverAnswer, setRecoverAnswer] = useState('')
   const [recoverError, setRecoverError] = useState('')
   const [recoverResult, setRecoverResult] = useState(null)
@@ -55,8 +56,6 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
   const [copiedLink, setCopiedLink] = useState('')
   const [hostPhoto, setHostPhoto] = useState(null)
   const [hostPhotoPreview, setHostPhotoPreview] = useState(null)
-
-  const [preferenceId, setPreferenceId] = useState(null)
 
   const compressImage = (file) => {
     return new Promise((resolve) => {
@@ -97,7 +96,6 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
 
   const handleValidFormSubmit = async () => {
     setStep('processing')
-    const formData = getValues()
     // 1. Create a preference on your backend
     try {
       // Simulation of fetching preference ID
@@ -282,7 +280,7 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
   }
 
   const handleRecoverKey = async () => {
-    if (!recoverAnswer.trim()) return
+    if (!recoverAnswer.trim() || !recoverEmail.trim()) return
     setRecoverError('')
     setRecoverLoading(true)
     setRecoverResult(null)
@@ -305,42 +303,39 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
 
     const normalize = (s) => s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     const answer = normalize(recoverAnswer)
+    const emailNormalized = normalize(recoverEmail)
 
     try {
       if (!isSupabaseConfigured) {
         const keys = Object.keys(localStorage).filter(k => k.startsWith('petone_mock_event_'))
         for (const key of keys) {
           const ev = JSON.parse(localStorage.getItem(key))
-          if (ev.security_answer === answer) {
+          if (normalize(ev.host_email) === emailNormalized && ev.security_answer === answer) {
             setRecoverResult({ token: ev.host_token, childName: ev.child_name })
             setRecoverLoading(false)
             return
           }
         }
-        setRecoverError('No se encontró un evento con esa respuesta.')
+        setRecoverError('No se encontró un paseo que coincida con estos datos.')
         setRecoverLoading(false)
         return
       }
 
-      const { data: events } = await supabase
-        .from('events')
-        .select('host_token, child_name, security_answer')
-        .limit(100)
+      const { data, error } = await supabase.rpc('recover_host_token', {
+        p_email: recoverEmail.trim(),
+        p_security_answer: answer
+      })
 
-      if (!events || events.length === 0) {
-        setRecoverError('No se encontró ningún evento.')
-        setRecoverLoading(false)
-        return
-      }
+      if (error) throw error
 
-      const match = events.find(ev => ev.security_answer === answer)
-      if (match) {
-        setRecoverResult({ token: match.host_token, childName: match.child_name })
+      if (data && data.length > 0) {
+        setRecoverResult({ token: data[0].host_token, childName: data[0].child_name })
       } else {
-        setRecoverError('No se encontró un evento con esa respuesta.')
+        setRecoverError('Correo o respuesta de seguridad incorrecta.')
       }
-    } catch {
-      setRecoverError('Error al buscar el evento.')
+    } catch (err) {
+      console.error('Error recovering key:', err)
+      setRecoverError('Error al buscar el paseo.')
     }
     setRecoverLoading(false)
   }
@@ -529,7 +524,7 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
             
             <div className="bg-slate-900/40 border border-slate-850 hover:border-slate-800 rounded-2xl p-5 text-left transition-all duration-300 group hover:-translate-y-0.5">
               <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 w-fit mb-4 group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors">
-                <Utensils size={18} />
+                <ClipboardList size={18} />
               </div>
               <h3 className="font-bold text-sm text-white mb-1.5">Fichas Médicas</h3>
               <p className="text-xs text-slate-400 leading-relaxed">Alergias, medicamentos y cuidados al alcance de tu mano durante el paseo.</p>
@@ -547,7 +542,7 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
           {/* Footer Recover Key */}
           <footer className="w-full text-center mt-12 pt-4 border-t border-slate-900/60 animate-fade-in-up delay-5">
             <button 
-              onClick={() => { setShowRecoverModal(true); setRecoverAnswer(''); setRecoverError(''); setRecoverResult(null) }}
+              onClick={() => { setShowRecoverModal(true); setRecoverEmail(''); setRecoverAnswer(''); setRecoverError(''); setRecoverResult(null) }}
               className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors py-2 cursor-pointer"
             >
               <HelpCircle size={13} /> 
@@ -835,22 +830,35 @@ export default function LandingPage({ onNavigateToAdmin, initialStep = 'home' })
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  value={recoverAnswer}
-                  onChange={(e) => { setRecoverAnswer(e.target.value); setRecoverError('') }}
-                  placeholder="Nombre de tu última mascota"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-base text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
-                  autoFocus
-                />
+              <div className="flex flex-col gap-3 text-left">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-300">Correo del Paseador</label>
+                  <input
+                    type="email"
+                    value={recoverEmail}
+                    onChange={(e) => { setRecoverEmail(e.target.value); setRecoverError('') }}
+                    placeholder="Ej: paseador.pedro@gmail.com"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-300">Pregunta de seguridad: ¿Cuál fue el nombre de tu última mascota?</label>
+                  <input
+                    type="text"
+                    value={recoverAnswer}
+                    onChange={(e) => { setRecoverAnswer(e.target.value); setRecoverError('') }}
+                    placeholder="Ej: Max"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                  />
+                </div>
                 {recoverError && (
-                  <p className="text-xs text-red-400 text-center">{recoverError}</p>
+                  <p className="text-xs text-red-400 text-center mt-1">{recoverError}</p>
                 )}
                 <button
                   onClick={handleRecoverKey}
-                  disabled={!recoverAnswer.trim() || recoverLoading}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
+                  disabled={!recoverAnswer.trim() || !recoverEmail.trim() || recoverLoading}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.97] mt-2 cursor-pointer"
                 >
                   {recoverLoading ? <><Loader2 size={14} className="animate-spin" /> Buscando...</> : 'Recuperar Clave'}
                 </button>
