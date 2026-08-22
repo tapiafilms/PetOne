@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useEventData } from '../hooks/useEventData'
 
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { supabase, getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import CameraCapture from '../components/CameraCapture'
 import Timeline from '../components/Timeline'
 import AllergyBanner from '../components/AllergyBanner'
@@ -325,17 +325,18 @@ export default function HostAdmin({ eventId, hostToken }) {
       let publicUrl = ''
 
       if (isSupabaseConfigured) {
+        const authedClient = getSupabaseClient(hostToken)
         const fileExt = pendingMedia.type === 'photo' ? 'webp' : 'mp4'
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
         const filePath = `event-${eventId}/${fileName}`
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await authedClient.storage
           .from('photos')
           .upload(filePath, pendingMedia.blob, { cacheControl: '3600', upsert: false })
 
         if (uploadError) throw uploadError
 
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = authedClient.storage
           .from('photos')
           .getPublicUrl(filePath)
 
