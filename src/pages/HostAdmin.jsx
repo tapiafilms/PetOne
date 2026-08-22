@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useEventData } from '../hooks/useEventData'
 
-import { supabase, getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
+import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import CameraCapture from '../components/CameraCapture'
 import Timeline from '../components/Timeline'
 import AllergyBanner from '../components/AllergyBanner'
@@ -20,6 +20,7 @@ import {
 
 export default function HostAdmin({ eventId, hostToken }) {
   const { event, guests, media, loading, error, updateTimeline, updateGuest, refresh, addMedia, finishEvent } = useEventData(eventId, hostToken)
+  const client = isSupabaseConfigured ? getSupabaseClient(hostToken) : null
   
   // Estados locales
   const [copiedText, setCopiedText] = useState('')
@@ -50,9 +51,8 @@ export default function HostAdmin({ eventId, hostToken }) {
   // Función para actualizar coordenadas del paseo
   const updateCoords = useCallback(async (coords) => {
     try {
-      if (isSupabaseConfigured) {
-        const authedClient = getSupabaseClient(hostToken)
-        await authedClient
+      if (isSupabaseConfigured && client) {
+        await client
           .from('events')
           .update({ location_coords: coords })
           .eq('id', eventId)
@@ -68,7 +68,7 @@ export default function HostAdmin({ eventId, hostToken }) {
     } catch (err) {
       console.error('Error updating location coords:', err)
     }
-  }, [eventId, hostToken])
+  }, [eventId, client])
 
   // Geolocalización GPS real
   useEffect(() => {
@@ -153,8 +153,8 @@ export default function HostAdmin({ eventId, hostToken }) {
     if (!eventId) return
 
     const fetchNotifications = async () => {
-      if (isSupabaseConfigured) {
-        const { data } = await supabase
+      if (isSupabaseConfigured && client) {
+        const { data } = await client
           .from('notifications')
           .select('*')
           .eq('event_id', eventId)
@@ -180,12 +180,12 @@ export default function HostAdmin({ eventId, hostToken }) {
     fetchNotifications()
     const interval = setInterval(fetchNotifications, 3000)
     return () => clearInterval(interval)
-  }, [eventId, activeNotification])
+  }, [eventId, activeNotification, client])
 
   // Cerrar notificación y marcar como leída
   const dismissNotification = async (notifId) => {
-    if (isSupabaseConfigured) {
-      await supabase
+    if (isSupabaseConfigured && client) {
+      await client
         .from('notifications')
         .update({ read: true })
         .eq('id', notifId)
@@ -325,19 +325,18 @@ export default function HostAdmin({ eventId, hostToken }) {
     try {
       let publicUrl = ''
 
-      if (isSupabaseConfigured) {
-        const authedClient = getSupabaseClient(hostToken)
+      if (isSupabaseConfigured && client) {
         const fileExt = pendingMedia.type === 'photo' ? 'webp' : 'mp4'
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
         const filePath = `event-${eventId}/${fileName}`
 
-        const { error: uploadError } = await authedClient.storage
+        const { error: uploadError } = await client.storage
           .from('photos')
           .upload(filePath, pendingMedia.blob, { cacheControl: '3600', upsert: false })
 
         if (uploadError) throw uploadError
 
-        const { data: urlData } = authedClient.storage
+        const { data: urlData } = client.storage
           .from('photos')
           .getPublicUrl(filePath)
 
@@ -559,8 +558,8 @@ export default function HostAdmin({ eventId, hostToken }) {
     if (!eventId) return
 
     const countGuestMessages = async () => {
-      if (isSupabaseConfigured) {
-        const { data } = await supabase
+      if (isSupabaseConfigured && client) {
+        const { data } = await client
           .from('messages')
           .select('id', { count: 'exact' })
           .eq('event_id', eventId)
@@ -578,7 +577,7 @@ export default function HostAdmin({ eventId, hostToken }) {
     countGuestMessages()
     const interval = setInterval(countGuestMessages, 3000)
     return () => clearInterval(interval)
-  }, [eventId])
+  }, [eventId, client])
 
   if (loading) {
     return (

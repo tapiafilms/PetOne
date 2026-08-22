@@ -25,9 +25,9 @@ export function useEventData(eventId, eventToken, personalToken = null) {
     : null
 
   // --- MOCK LOCALSTORAGE LOGIC (LOCAL DEMO MODE) ---
-  const fetchLocalData = useCallback(async () => {
+  const fetchLocalData = useCallback(async (silent = false) => {
     if (!eventId) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     setError(null)
     
     try {
@@ -141,9 +141,9 @@ export function useEventData(eventId, eventToken, personalToken = null) {
   // --- FIN MOCK LOGIC ---
 
   // --- SUPABASE LOGIC (CLOUD MODE) ---
-  const fetchCloudData = useCallback(async () => {
+  const fetchCloudData = useCallback(async (silent = false) => {
     if (!eventId || !supabaseClient) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     setError(null)
 
     try {
@@ -296,7 +296,7 @@ export function useEventData(eventId, eventToken, personalToken = null) {
       fetchLocalData()
 
       const handleStorageChange = () => {
-        if (mounted) fetchLocalData()
+        if (mounted) fetchLocalData(true)
       }
 
       window.addEventListener('storage', handleStorageChange)

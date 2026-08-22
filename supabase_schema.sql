@@ -381,3 +381,59 @@ BEGIN
 END;
 $$;
 
+
+-- ====================================================
+-- TABLA: notifications
+-- ====================================================
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  guest_id UUID REFERENCES guests(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- e.g. 'arrival'
+  child_name TEXT,
+  parent_name TEXT,
+  read BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Habilitar RLS
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- Políticas para notifications
+CREATE POLICY "Permitir lectura de notificaciones por paseador" ON notifications
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = notifications.event_id 
+      AND events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+    )
+  );
+
+CREATE POLICY "Permitir inserción de notificaciones por tutor" ON notifications
+  FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM guests 
+      WHERE guests.id = notifications.guest_id 
+      AND guests.personal_token = coalesce(current_setting('request.headers', true)::json->>'x-guest-token', '')
+    )
+  );
+
+CREATE POLICY "Permitir actualización de notificaciones por paseador" ON notifications
+  FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = notifications.event_id 
+      AND events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM events 
+      WHERE events.id = notifications.event_id 
+      AND events.host_token = coalesce(current_setting('request.headers', true)::json->>'x-event-token', '')
+    )
+  );
+

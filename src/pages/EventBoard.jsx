@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { useEventData } from '../hooks/useEventData'
 import { usePushSubscription } from '../hooks/usePushSubscription'
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient'
 import Timeline from '../components/Timeline'
 import PhotoGallery from '../components/PhotoGallery'
 import PullToRefresh from '../components/PullToRefresh'
@@ -16,6 +16,7 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
   const effectiveGuestToken = guestToken || localStorage.getItem(`petone_guest_token_${eventId}`) || null
   const { event, currentGuest, media, loading, error, refresh, updateGuest } = useEventData(eventId, effectiveGuestToken, personalToken)
   const { isSubscribed, loading: pushLoading, subscribe, unsubscribe } = usePushSubscription(currentGuest, updateGuest)
+  const client = isSupabaseConfigured ? getSupabaseClient(effectiveGuestToken, personalToken) : null
 
   // Estados locales para edición de autorizados y alergias
   const [newPickupName, setNewPickupName] = useState('')
@@ -58,8 +59,11 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
     
     if (!lat || !lng) return
 
+    const container = document.getElementById('live-map')
+    if (!container) return
+
     if (!mapRef.current) {
-      mapRef.current = window.L.map('live-map', {
+      mapRef.current = window.L.map(container, {
         zoomControl: true,
         scrollWheelZoom: false
       }).setView([lat, lng], 16)
@@ -103,9 +107,9 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
 
       let lastReadAt = null
 
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && client) {
         // Obtener last_read_at del chat_read_status
-        const { data: readStatus } = await supabase
+        const { data: readStatus } = await client
           .from('chat_read_status')
           .select('last_read_at')
           .eq('event_id', eventId)
@@ -114,7 +118,7 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
 
         if (readStatus) lastReadAt = readStatus.last_read_at
 
-        let query = supabase
+        let query = client
           .from('messages')
           .select('id', { count: 'exact' })
           .eq('event_id', eventId)
@@ -149,15 +153,15 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
     countUnread()
     const interval = setInterval(countUnread, 3000)
     return () => clearInterval(interval)
-  }, [eventId, currentGuest, showChat])
+  }, [eventId, currentGuest, showChat, client])
 
   // Verificar si ya envió notificación de llegada
   useEffect(() => {
     if (!eventId || !currentGuest) return
 
     const checkArrival = async () => {
-      if (isSupabaseConfigured) {
-        const { data } = await supabase
+      if (isSupabaseConfigured && client) {
+        const { data } = await client
           .from('notifications')
           .select('id')
           .eq('event_id', eventId)
@@ -175,7 +179,7 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
     }
 
     checkArrival()
-  }, [eventId, currentGuest])
+  }, [eventId, currentGuest, client])
 
   // Limpiar unread cuando se abre el chat
   const handleOpenChat = () => {
@@ -189,8 +193,8 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
     setArrivalLoading(true)
 
     try {
-      if (isSupabaseConfigured) {
-        await supabase.from('notifications').insert({
+      if (isSupabaseConfigured && client) {
+        await client.from('notifications').insert({
           event_id: eventId,
           guest_id: currentGuest.id,
           type: 'arrival',
