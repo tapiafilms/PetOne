@@ -437,3 +437,16 @@ CREATE POLICY "Permitir actualización de notificaciones por paseador" ON notifi
     )
   );
 
+
+-- ====================================================
+-- HABILITAR REALTIME (Para streaming en tiempo real)
+-- ====================================================
+BEGIN;
+  -- Agregar las tablas a la publicación de tiempo real de Supabase
+  ALTER PUBLICATION supabase_realtime ADD TABLE events;
+  ALTER PUBLICATION supabase_realtime ADD TABLE guests;
+  ALTER PUBLICATION supabase_realtime ADD TABLE event_media;
+  ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+  ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+COMMIT;
+

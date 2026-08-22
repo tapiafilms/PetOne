@@ -57,34 +57,75 @@ export default function EventBoard({ eventId, guestToken, personalToken }) {
     const lat = event?.location_coords?.lat
     const lng = event?.location_coords?.lng
     
-    if (!lat || !lng) return
+    if (!lat || !lng) {
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove()
+        } catch (e) {
+          console.error('Error removing map:', e)
+        }
+        mapRef.current = null
+        markerRef.current = null
+      }
+      return
+    }
 
     const container = document.getElementById('live-map')
     if (!container) return
 
     if (!mapRef.current) {
-      mapRef.current = window.L.map(container, {
-        zoomControl: true,
-        scrollWheelZoom: false
-      }).setView([lat, lng], 16)
+      try {
+        mapRef.current = window.L.map(container, {
+          zoomControl: true,
+          scrollWheelZoom: false
+        }).setView([lat, lng], 16)
 
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-      }).addTo(mapRef.current)
+        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }).addTo(mapRef.current)
 
-      const dogIcon = window.L.divIcon({
-        html: '<div style="font-size: 28px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4));">🦮</div>',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
-      })
+        const dogIcon = window.L.divIcon({
+          html: '<div style="font-size: 28px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4));">🦮</div>',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        })
 
-      markerRef.current = window.L.marker([lat, lng], { icon: dogIcon }).addTo(mapRef.current)
+        markerRef.current = window.L.marker([lat, lng], { icon: dogIcon }).addTo(mapRef.current)
+        
+        // Invalidar tamaño para forzar renderizado completo de tiles
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.invalidateSize()
+          }
+        }, 200)
+      } catch (err) {
+        console.error('Error initializing Leaflet map:', err)
+      }
     } else {
-      const newPos = [lat, lng]
-      markerRef.current.setLatLng(newPos)
-      mapRef.current.panTo(newPos)
+      try {
+        const newPos = [lat, lng]
+        markerRef.current.setLatLng(newPos)
+        mapRef.current.panTo(newPos)
+      } catch (err) {
+        console.error('Error updating Leaflet marker:', err)
+      }
     }
   }, [leafletLoaded, event?.location_coords])
+
+  // Limpiar mapa al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove()
+        } catch (e) {
+          console.error('Error on map unmount:', e)
+        }
+        mapRef.current = null
+        markerRef.current = null
+      }
+    }
+  }, [])
 
   // Generar link de WhatsApp o email de respaldo si es necesario
   const formattedEventDate = event?.event_date 
